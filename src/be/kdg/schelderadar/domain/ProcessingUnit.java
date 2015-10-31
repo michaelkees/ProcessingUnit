@@ -15,6 +15,7 @@ import java.util.concurrent.TimeoutException;
 public class ProcessingUnit {
     RabbitMQReceiver rabbitMQ;
     ShipServiceApi shipService;
+    boolean isReceiving;
 
     private final ShipBuffer shipBuffer;
 
@@ -32,11 +33,18 @@ public class ProcessingUnit {
         this.shipService = shipService;
     }
 
-
-
-
     public void start(){
+        isReceiving = true;
+        /*try {
+            //this.rabbitMQ.init();
+            while(isReceiving) {
 
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        } */
         //TEST: www.services4se3.com/shipservice/shipid
     }
 }
