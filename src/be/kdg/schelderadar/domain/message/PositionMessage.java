@@ -1,4 +1,4 @@
-package be.kdg.schelderadar.domain;
+package be.kdg.schelderadar.domain.message;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;

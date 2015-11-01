@@ -1,6 +1,6 @@
-package be.kdg.schelderadar.domain;
+package be.kdg.schelderadar.domain.model;
 
-import java.util.Arrays;
+import be.kdg.schelderadar.domain.model.Cargo;
 
 /**
  * User: michaelkees

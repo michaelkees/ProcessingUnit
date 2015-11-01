@@ -1,5 +1,8 @@
 package be.kdg.schelderadar.domain;
 
+import be.kdg.schelderadar.domain.model.Ship;
+import be.kdg.schelderadar.domain.model.ShipInfo;
+
 import java.util.*;
 
 /**
@@ -8,8 +11,8 @@ import java.util.*;
  */
 public class ShipBuffer {
     private final ArrayList<Ship> shipList = new ArrayList<>();
-    private int timeInterruptShipBuffering;
     private Map<Ship, Long> timeShipLastSignal = new TreeMap<>();
+    private int timeInterruptShipBuffering;
 
     public ShipBuffer(int timeInterruptShipBuffering) {
         this.timeInterruptShipBuffering = timeInterruptShipBuffering;
@@ -70,7 +73,6 @@ public class ShipBuffer {
     public void checkSignalShip() {
         ArrayList<Ship> noSignalShips = new ArrayList<>();
         if (!shipList.isEmpty()) {
-
             for (Ship s : shipList) {
                 long shipLastSignalTime = timeShipLastSignal.get(s);
                 long currentTime = new Date().getTime();
@@ -79,8 +81,7 @@ public class ShipBuffer {
                     noSignalShips.add(s);
                 }
             }
-
-            for(Ship s : noSignalShips){
+            for (Ship s : noSignalShips) {
                 shipList.remove(s);
             }
 

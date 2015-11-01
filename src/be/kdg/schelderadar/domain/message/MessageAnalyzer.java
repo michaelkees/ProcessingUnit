@@ -1,4 +1,7 @@
-package be.kdg.schelderadar.domain;
+package be.kdg.schelderadar.domain.message;
+
+import be.kdg.schelderadar.domain.message.IncidentMessage;
+import be.kdg.schelderadar.domain.message.PositionMessage;
 
 /**
  * User: michaelkees

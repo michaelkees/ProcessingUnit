@@ -1,6 +1,6 @@
-package be.kdg.schelderadar.out;
+package be.kdg.schelderadar.out.store;
 
-import be.kdg.schelderadar.domain.PositionMessage;
+import be.kdg.schelderadar.domain.message.PositionMessage;
 
 /**
  * User: michaelkees

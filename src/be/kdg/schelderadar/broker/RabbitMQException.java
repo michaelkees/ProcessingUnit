@@ -1,4 +1,4 @@
-package be.kdg.schelderadar.in;
+package be.kdg.schelderadar.broker;
 
 /**
  * User: michaelkees

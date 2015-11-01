@@ -1,6 +1,7 @@
 package be.kdg.schelderadar.domain;
 
-import java.util.ArrayList;
+import be.kdg.schelderadar.domain.model.ShipInfo;
+
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
@@ -37,5 +38,7 @@ public class ShipCache {
     public void clearCache(){
         shipInfos.clear();
     }
+
+    //TODO #keren contact leggen als service uitvalt -> INSTELBAAR
 
 }

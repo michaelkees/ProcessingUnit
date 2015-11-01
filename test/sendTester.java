@@ -1,4 +1,4 @@
-import be.kdg.schelderadar.domain.PositionMessage;
+import be.kdg.schelderadar.domain.message.PositionMessage;
 import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.ValidationException;

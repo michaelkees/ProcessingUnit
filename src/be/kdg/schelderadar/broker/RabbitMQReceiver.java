@@ -1,10 +1,10 @@
-package be.kdg.schelderadar.in;
+package be.kdg.schelderadar.broker;
 
 
-import be.kdg.schelderadar.domain.MessageCollector;
-import be.kdg.schelderadar.domain.MessageConverter;
+import be.kdg.schelderadar.domain.message.MessageCollector;
+import be.kdg.schelderadar.domain.message.MessageConverter;
 
-import be.kdg.schelderadar.domain.PositionMessage;
+import be.kdg.schelderadar.domain.message.PositionMessage;
 import com.rabbitmq.client.*;
 import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.ValidationException;

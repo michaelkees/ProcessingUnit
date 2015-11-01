@@ -1,4 +1,4 @@
-package be.kdg.schelderadar.domain;
+package be.kdg.schelderadar.domain.model;
 
 /**
  * User: michaelkees

@@ -1,6 +1,7 @@
-package be.kdg.schelderadar.domain;
+package be.kdg.schelderadar.domain.message;
 
-import be.kdg.schelderadar.out.MessageStorage;
+import be.kdg.schelderadar.domain.message.PositionMessage;
+import be.kdg.schelderadar.out.store.MessageStorage;
 
 import java.util.ArrayList;
 import java.util.Collection;

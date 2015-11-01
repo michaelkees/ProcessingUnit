@@ -1,4 +1,4 @@
-package be.kdg.schelderadar.out;
+package be.kdg.schelderadar.out.report;
 
 /**
  * User: michaelkees

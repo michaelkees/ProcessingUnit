@@ -1,6 +1,6 @@
-package be.kdg.schelderadar.domain;
+package be.kdg.schelderadar.domain.message;
 
-import com.sun.tools.classfile.Type;
+import be.kdg.schelderadar.domain.message.PositionMessage;
 import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.Unmarshaller;

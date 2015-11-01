@@ -1,11 +1,4 @@
-import be.kdg.schelderadar.domain.MessageAnalyzer;
-import be.kdg.schelderadar.domain.MessageCollector;
-import be.kdg.schelderadar.in.RabbitMQ;
-import be.kdg.schelderadar.in.RabbitMQException;
-import be.kdg.schelderadar.in.RabbitMQReceiver;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
+import be.kdg.schelderadar.broker.RabbitMQException;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;

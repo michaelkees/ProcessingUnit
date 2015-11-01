@@ -1,10 +1,10 @@
-import be.kdg.schelderadar.domain.MessageCollector;
+import be.kdg.schelderadar.domain.message.MessageCollector;
 import be.kdg.schelderadar.domain.ProcessingUnit;
 import be.kdg.schelderadar.domain.ShipCache;
-import be.kdg.schelderadar.in.RabbitMQException;
-import be.kdg.schelderadar.in.RabbitMQReceiver;
-import be.kdg.schelderadar.out.MessageStorage;
-import be.kdg.schelderadar.out.ShipMessageStorage;
+import be.kdg.schelderadar.broker.RabbitMQException;
+import be.kdg.schelderadar.broker.RabbitMQReceiver;
+import be.kdg.schelderadar.out.store.MessageStorage;
+import be.kdg.schelderadar.out.store.ShipMessageStorage;
 import be.kdg.schelderadar.service.ShipService;
 import be.kdg.schelderadar.service.ShipServiceApi;
 import be.kdg.schelderadar.service.ShipServiceException;
