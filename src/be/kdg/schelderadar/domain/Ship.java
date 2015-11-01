@@ -1,27 +1,58 @@
 package be.kdg.schelderadar.domain;
 
+import java.util.Date;
+
 /**
  * User: michaelkees
  * Date: 31/10/15
  */
-public class Ship {
-    private int Id;
+public class Ship implements Comparable<Ship>{
+    private int shipId;
+    private String centraleId;
+    private Date timestamp;
+    private int afstandTotLoskade;
     private ShipInfo shipInfo;
+
+    public Ship(int shipId, String centraleId, Date timestamp, int afstandTotLoskade) {
+        this.shipId = shipId;
+        this.centraleId = centraleId;
+        this.timestamp = timestamp;
+        this.afstandTotLoskade = afstandTotLoskade;
+    }
 
     public Ship() {
     }
 
-    public Ship(int id, ShipInfo shipInfo) {
-        Id = id;
-        this.shipInfo = shipInfo;
+    public int getShipId() {
+        return shipId;
     }
 
-    public int getId() {
-        return Id;
+    public void setShipId(int shipId) {
+        this.shipId = shipId;
     }
 
-    public void setId(int id) {
-        Id = id;
+    public String getCentraleId() {
+        return centraleId;
+    }
+
+    public void setCentraleId(String centraleId) {
+        this.centraleId = centraleId;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public int getAfstandTotLoskade() {
+        return afstandTotLoskade;
+    }
+
+    public void setAfstandTotLoskade(int afstandTotLoskade) {
+        this.afstandTotLoskade = afstandTotLoskade;
     }
 
     public ShipInfo getShipInfo() {
@@ -30,5 +61,10 @@ public class Ship {
 
     public void setShipInfo(ShipInfo shipInfo) {
         this.shipInfo = shipInfo;
+    }
+
+    @Override
+    public int compareTo(Ship o) {
+        return this.shipId - o.shipId;
     }
 }

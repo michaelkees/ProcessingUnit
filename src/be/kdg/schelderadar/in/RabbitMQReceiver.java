@@ -1,58 +1,51 @@
 package be.kdg.schelderadar.in;
 
 
-import be.kdg.schelderadar.domain.BrokerException;
-import be.kdg.schelderadar.domain.MessageAnalyzer;
+import be.kdg.schelderadar.domain.MessageCollector;
 import be.kdg.schelderadar.domain.MessageConverter;
+
 import be.kdg.schelderadar.domain.PositionMessage;
-import be.kdg.se3.proxy.ShipServiceProxy;
 import com.rabbitmq.client.*;
 import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.ValidationException;
 
 import java.io.IOException;
-import java.util.concurrent.TimeoutException;
 
 /**
  * User: michaelkees
  * Date: 31/10/15
  */
-public class RabbitMQReceiver {
+public class RabbitMQReceiver implements RabbitMQ {
     private final String QUEUE_NAME;
 
-    private Channel channel;
     private Consumer consumer;
-    private MessageAnalyzer msgAnalyzer;
+    private Channel channel;
+    private MessageCollector msgCollector;
 
-    public RabbitMQReceiver(String QUEUE_NAME, Channel channel, MessageAnalyzer msgAnalyzer) {
-        this.QUEUE_NAME = QUEUE_NAME;
+    public RabbitMQReceiver(String queueName, Channel channel, MessageCollector msgCollector) {
+        this.QUEUE_NAME = queueName;
         this.channel = channel;
-        this.msgAnalyzer = msgAnalyzer;
+        this.msgCollector = msgCollector;
     }
 
+    @Override
     public void init() throws RabbitMQException {
-        if (consumer != null) {
+        if (consumer == null) {
             try {
-                this.consumer = new DefaultConsumer(channel) {
+                this.consumer = new DefaultConsumer(this.channel) {
                     @Override
                     public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
                             throws IOException {
-
-                        String message = new String(body, "UTF-8");
-                        MessageConverter converter = new MessageConverter();
-
-                        //TODO: check if Position message or Incident message
                         try {
+                            String message = new String(body, "UTF-8");
+                            getMessage(message);
 
-                            PositionMessage ps = (PositionMessage) converter.convertJavaXML(message, PositionMessage.class);
-                            msgAnalyzer.analyzeMessage(ps);
-
-                        } catch (MarshalException | ValidationException e ){
+                        } catch (MarshalException | ValidationException e) {
                             throw new IOException("Error reading msg");
                         }
                     }
                 };
-                channel.basicConsume(QUEUE_NAME, true, consumer);
+                this.channel.basicConsume(QUEUE_NAME, true, consumer);
             } catch (IOException e) {
                 this.consumer = null;
                 throw new RabbitMQException(e.getMessage(), e);
@@ -61,7 +54,13 @@ public class RabbitMQReceiver {
 
     }
 
-    public void setMsgAnalyzer(MessageAnalyzer msgAnalyzer) {
-        this.msgAnalyzer = msgAnalyzer;
+    public void getMessage(String message) throws MarshalException, ValidationException {
+        MessageConverter converter = new MessageConverter();
+        if (message.contains("position")){
+            PositionMessage ps = (PositionMessage) converter.convertXMLToJava(message);
+            msgCollector.addPostitionMessage(ps);
+        }
+        //TODO: check if Position message or Incident messagE
     }
+
 }

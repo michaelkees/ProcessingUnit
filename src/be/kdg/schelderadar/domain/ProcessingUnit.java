@@ -1,50 +1,108 @@
 package be.kdg.schelderadar.domain;
 
-import be.kdg.schelderadar.in.RabbitMQReceiver;
-import be.kdg.schelderadar.in.ShipServiceApi;
+import be.kdg.schelderadar.in.RabbitMQ;
+import be.kdg.schelderadar.in.RabbitMQException;
+import be.kdg.schelderadar.out.MessageStorage;
+import be.kdg.schelderadar.service.ShipService;
+import be.kdg.schelderadar.service.ShipServiceException;
 
-import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Controller class
  */
 
 public class ProcessingUnit {
-    RabbitMQReceiver rabbitMQ;
-    ShipServiceApi shipService;
-    boolean isReceiving;
-
+    private int timeToInterrupt = 100000; //DEFAULT
+    private RabbitMQ rabbitMQ;
+    private ShipService shipService;
+    private boolean isReceiving;
+    private MessageCollector msgCollector;
     private final ShipBuffer shipBuffer;
+    private  ShipCache shipCache;
 
-    public ProcessingUnit(RabbitMQReceiver rabbitMQ, ShipServiceApi shipServiceApi) {
-        this.rabbitMQ = rabbitMQ;
-        this.shipService = shipServiceApi;
-        shipBuffer = new ShipBuffer();
+    public ProcessingUnit(MessageCollector msgCollector) {
+        this.shipBuffer = new ShipBuffer(timeToInterrupt);
+        this.isReceiving = false;
+        this.msgCollector = msgCollector;
+
     }
 
-    public void setRabbitMQ(RabbitMQReceiver rabbitMQ) {
+    public void setShipCache(ShipCache shipCache) {
+        this.shipCache = shipCache;
+    }
+
+    public void setTimeToInterrupt(int timeToInterrupt) {
+        this.timeToInterrupt = timeToInterrupt;
+    }
+
+    public void setRabbitMQ(RabbitMQ rabbitMQ) {
         this.rabbitMQ = rabbitMQ;
     }
 
-    public void setShipService(ShipServiceApi shipService) {
+    public void setShipService(ShipService shipService) {
         this.shipService = shipService;
     }
 
-    public void start(){
+    public void start() throws RabbitMQException, ShipServiceException {
         isReceiving = true;
-        /*try {
-            //this.rabbitMQ.init();
-            while(isReceiving) {
 
+        while (isReceiving) {
+                rabbitMQ.init();
+                performCollect();
+                checkBufferedShipSignal();
+                checkCacheClear();
+                if(!getInfoShipBuffer().isEmpty()){
+                    System.out.println(getInfoShipBuffer());
+                }
+                msgCollector.clear();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (TimeoutException e) {
-            e.printStackTrace();
-        } */
-        //TEST: www.services4se3.com/shipservice/shipid
+        }
     }
+
+    private void checkCacheClear() {
+        shipCache.checkCacheClear();
+    }
+
+    private void checkBufferedShipSignal() {
+        shipBuffer.checkSignalShip();
+    }
+
+    public void performCollect() throws ShipServiceException {
+        for (PositionMessage ps : msgCollector.getPositionMessages()) {
+            bufferShip(ps);
+        }
+    }
+
+    public void bufferShip(PositionMessage ps) throws ShipServiceException {
+        //if ship already exists
+        if(shipBuffer.exitsShip(ps.getShipId())){
+            System.out.println("update ship");
+            Ship shipOnRadar = shipBuffer.getShip(ps.getShipId());
+            shipBuffer.updateShip(shipOnRadar, ps.getAfstandTotLoskade());
+
+        } else {
+            System.out.println("create ship");
+            Ship ship = new Ship(ps.getShipId(),ps.getCentraleId(),ps.getTimestamp(),ps.getAfstandTotLoskade());
+            ship.setShipInfo(collectShipInfo(ship.getShipId()));
+            shipBuffer.addShip(ship);
+        }
+    }
+
+    public ShipInfo collectShipInfo(int shipId) throws ShipServiceException {
+        //cache info
+        ShipInfo shipInfo = shipService.getShipInfo(shipId);
+        shipCache.cacheShipInfo(shipId, shipInfo);
+        return shipInfo;
+    }
+
+    public String getInfoShipBuffer(){
+        return shipBuffer.toString();
+    }
+
 }

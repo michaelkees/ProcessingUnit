@@ -1,5 +1,5 @@
-import be.kdg.schelderadar.domain.ShipServiceException;
-import be.kdg.schelderadar.in.ShipServiceApi;
+import be.kdg.schelderadar.service.ShipServiceException;
+import be.kdg.schelderadar.service.ShipServiceApi;
 
 /**
  * User: michaelkees

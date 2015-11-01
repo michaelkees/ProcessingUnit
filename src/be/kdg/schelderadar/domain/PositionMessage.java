@@ -1,52 +1,52 @@
 package be.kdg.schelderadar.domain;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Date;
 
 /**
  * User: michaelkees
  * Date: 31/10/15
  */
+
+@XmlRootElement
 public class PositionMessage {
     private int shipId;
-    private int centraleId;
-    private Date Timestamp;
+    private String centraleId;
+    private Date timestamp;
     private int afstandTotLoskade;
 
-    public PositionMessage(int shipId, int centraleId, Date timestamp, int afstandTotLoskade) {
-        this.shipId = shipId;
-        this.centraleId = centraleId;
-        Timestamp = timestamp;
-        this.afstandTotLoskade = afstandTotLoskade;
-    }
 
     public int getShipId() {
         return shipId;
     }
 
-    public void setShipId(int shipId) {
-        this.shipId = shipId;
-    }
-
-    public int getCentraleId() {
+    public String getCentraleId() {
         return centraleId;
     }
 
-    public void setCentraleId(int centraleId) {
-        this.centraleId = centraleId;
-    }
-
     public Date getTimestamp() {
-        return Timestamp;
-    }
-
-    public void setTimestamp(Date timestamp) {
-        Timestamp = timestamp;
+        return timestamp;
     }
 
     public int getAfstandTotLoskade() {
         return afstandTotLoskade;
     }
 
+    @XmlElement
+    public void setShipId(int shipId) {
+        this.shipId = shipId;
+    }
+    @XmlElement
+    public void setCentraleId(String centraleId) {
+        this.centraleId = centraleId;
+    }
+    @XmlElement
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+    @XmlElement
     public void setAfstandTotLoskade(int afstandTotLoskade) {
         this.afstandTotLoskade = afstandTotLoskade;
     }

@@ -1,9 +1,8 @@
-package be.kdg.schelderadar.in;
+package be.kdg.schelderadar.service;
 
 import be.kdg.schelderadar.domain.Cargo;
 import be.kdg.schelderadar.domain.JSONHandler;
 import be.kdg.schelderadar.domain.ShipInfo;
-import be.kdg.schelderadar.domain.ShipServiceException;
 import be.kdg.se3.proxy.ShipServiceProxy;
 
 import javax.json.JsonObject;
@@ -14,7 +13,7 @@ import java.io.IOException;
  * User: michaelkees
  * Date: 31/10/15
  */
-public class ShipServiceApi {
+public class ShipServiceApi implements ShipService {
     private ShipServiceProxy proxy;
     private String url;
 
@@ -25,7 +24,6 @@ public class ShipServiceApi {
 
     public ShipInfo getShipInfo(int shipId) throws ShipServiceException {
         try {
-
             String shipInfoJson = proxy.get(url + shipId);
             JsonObject shipObject = JSONHandler.handleJSON(shipInfoJson);
 

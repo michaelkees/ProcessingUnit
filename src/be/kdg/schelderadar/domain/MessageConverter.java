@@ -16,17 +16,22 @@ import java.io.Writer;
  * Date: 31/10/15
  */
 public class MessageConverter {
-    public  String convertXMLJava(Object object) throws MarshalException, ValidationException {
+    public  String convertJavaToXML(Object object) throws MarshalException, ValidationException {
         Writer writer= new StringWriter();
         Marshaller.marshal(object, writer);
         return writer.toString();
     }
 
-    public  Object convertJavaXML(String XMLmessage, Class classType) throws MarshalException, ValidationException {
+    public  Object convertXMLToJava(String XMLmessage, Object object) throws MarshalException, ValidationException {
         Reader reader = new StringReader(XMLmessage);
-        Object object = Unmarshaller.unmarshal(classType.getClass(), reader);
+        return (Object) Unmarshaller.unmarshal(object.getClass(), reader);
         //more options
-        return object;
+    }
+
+    public  Object convertXMLToJava(String XMLmessage) throws MarshalException, ValidationException {
+        Reader reader = new StringReader(XMLmessage);
+        return (PositionMessage) Unmarshaller.unmarshal(PositionMessage.class, reader);
+        //more options
     }
 
 }
