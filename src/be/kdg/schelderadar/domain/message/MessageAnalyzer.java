@@ -1,15 +1,12 @@
 package be.kdg.schelderadar.domain.message;
 
-import be.kdg.schelderadar.domain.message.IncidentMessage;
-import be.kdg.schelderadar.domain.message.PositionMessage;
+import org.exolab.castor.xml.MarshalException;
+import org.exolab.castor.xml.ValidationException;
 
 /**
  * User: michaelkees
- * Date: 31/10/15
+ * Date: 03/11/15
  */
 public interface MessageAnalyzer {
-    void analyzeMessage(PositionMessage message);
-    void analyzeMessage(IncidentMessage message);
-
-
+    void analyzeMessage(String message) throws MarshalException, ValidationException;
 }

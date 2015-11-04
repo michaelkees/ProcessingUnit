@@ -1,7 +1,7 @@
 package be.kdg.schelderadar.domain;
 
-import be.kdg.schelderadar.domain.model.Ship;
-import be.kdg.schelderadar.domain.model.ShipInfo;
+import be.kdg.schelderadar.domain.ship.Ship;
+import be.kdg.schelderadar.domain.ship.ShipInfo;
 
 import java.util.*;
 
@@ -9,7 +9,7 @@ import java.util.*;
  * User: michaelkees
  * Date: 31/10/15
  */
-public class ShipBuffer {
+public class ShipBuffer implements ShipBufferListener {
     private final ArrayList<Ship> shipList = new ArrayList<>();
     private Map<Ship, Long> timeShipLastSignal = new TreeMap<>();
     private int timeInterruptShipBuffering;

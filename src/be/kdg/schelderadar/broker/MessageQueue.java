@@ -4,12 +4,12 @@ package be.kdg.schelderadar.broker;
  * User: michaelkees
  * Date: 31/10/15
  */
-public interface RabbitMQ {
+public interface MessageQueue {
     /**
      *
-     * @throws RabbitMQException
+     * @throws MQException
      */
-    void init() throws RabbitMQException;
+    void init() throws MQException;
 
 
 }

@@ -1,10 +1,8 @@
 package be.kdg.schelderadar.broker;
 
 
-import be.kdg.schelderadar.domain.message.MessageCollector;
-import be.kdg.schelderadar.domain.message.MessageConverter;
+import be.kdg.schelderadar.domain.message.*;
 
-import be.kdg.schelderadar.domain.message.PositionMessage;
 import com.rabbitmq.client.*;
 import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.ValidationException;
@@ -15,21 +13,21 @@ import java.io.IOException;
  * User: michaelkees
  * Date: 31/10/15
  */
-public class RabbitMQReceiver implements RabbitMQ {
+public class RabbitMQReceiver implements MessageQueue {
     private final String QUEUE_NAME;
 
     private Consumer consumer;
     private Channel channel;
-    private MessageCollector msgCollector;
+    private MessageAnalyzer msgAnalyzer;
 
-    public RabbitMQReceiver(String queueName, Channel channel, MessageCollector msgCollector) {
+    public RabbitMQReceiver(String queueName, Channel channel, MessageAnalyzer msgAnalyzer) {
         this.QUEUE_NAME = queueName;
         this.channel = channel;
-        this.msgCollector = msgCollector;
+        this.msgAnalyzer = msgAnalyzer;
     }
 
     @Override
-    public void init() throws RabbitMQException {
+    public void init() throws MQException {
         if (consumer == null) {
             try {
                 this.consumer = new DefaultConsumer(this.channel) {
@@ -38,7 +36,8 @@ public class RabbitMQReceiver implements RabbitMQ {
                             throws IOException {
                         try {
                             String message = new String(body, "UTF-8");
-                            getMessage(message);
+
+                            msgAnalyzer.analyzeMessage(message);
 
                         } catch (MarshalException | ValidationException e) {
                             throw new IOException("Error reading msg");
@@ -48,19 +47,13 @@ public class RabbitMQReceiver implements RabbitMQ {
                 this.channel.basicConsume(QUEUE_NAME, true, consumer);
             } catch (IOException e) {
                 this.consumer = null;
-                throw new RabbitMQException(e.getMessage(), e);
+                throw new MQException(e.getMessage(), e);
             }
         }
 
     }
 
-    public void getMessage(String message) throws MarshalException, ValidationException {
-        MessageConverter converter = new MessageConverter();
-        if (message.contains("position")){
-            PositionMessage ps = (PositionMessage) converter.convertXMLToJava(message);
-            msgCollector.addPostitionMessage(ps);
-        }
-        //TODO: check if Position message or Incident messagE
+    public void setMsgAnalyzer(MessageAnalyzer msgAnalyzer) {
+        this.msgAnalyzer = msgAnalyzer;
     }
-
 }

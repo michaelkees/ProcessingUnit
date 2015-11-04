@@ -1,6 +1,6 @@
-package be.kdg.schelderadar.domain;
+package be.kdg.schelderadar.cache;
 
-import be.kdg.schelderadar.domain.model.ShipInfo;
+import be.kdg.schelderadar.domain.ship.ShipInfo;
 
 import java.util.Date;
 import java.util.Map;
@@ -10,12 +10,12 @@ import java.util.TreeMap;
  * User: michaelkees
  * Date: 31/10/15
  */
-public class ShipCache {
+public class ShipInfoCache {
     private Map<Integer, ShipInfo> shipInfos;
     private long lastTimeCleared;
     private long timeSpanToCache;
 
-    public ShipCache(long timeSpanToCache) {
+    public ShipInfoCache(long timeSpanToCache) {
         this.shipInfos = new TreeMap<>();
         this.lastTimeCleared = new Date().getTime();
         this.timeSpanToCache = timeSpanToCache;
@@ -35,10 +35,9 @@ public class ShipCache {
             clearCache();
         }
     }
+
     public void clearCache(){
         shipInfos.clear();
     }
-
-    //TODO #keren contact leggen als service uitvalt -> INSTELBAAR
 
 }

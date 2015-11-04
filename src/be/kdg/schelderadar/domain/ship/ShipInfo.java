@@ -1,6 +1,4 @@
-package be.kdg.schelderadar.domain.model;
-
-import be.kdg.schelderadar.domain.model.Cargo;
+package be.kdg.schelderadar.domain.ship;
 
 /**
  * User: michaelkees

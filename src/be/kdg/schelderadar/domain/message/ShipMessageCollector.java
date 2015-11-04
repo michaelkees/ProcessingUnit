@@ -1,6 +1,5 @@
 package be.kdg.schelderadar.domain.message;
 
-import be.kdg.schelderadar.domain.message.PositionMessage;
 import be.kdg.schelderadar.out.store.MessageStorage;
 
 import java.util.ArrayList;
@@ -8,31 +7,33 @@ import java.util.Collection;
 
 /**
  * User: michaelkees
- * Date: 01/11/15
+ * Date: 04/11/15
  */
-public class MessageCollector {
+public class ShipMessageCollector {
     private Collection<PositionMessage> positionMessages = new ArrayList<>();
+    private Collection<IncidentMessage> incidentMessages = new ArrayList<>();
 
-    private MessageStorage msgStorage;
-
-    public MessageCollector(MessageStorage msgStorage) {
-       this.msgStorage = msgStorage;
+    public ShipMessageCollector() {
     }
 
     public Collection<PositionMessage> getPositionMessages() {
         return positionMessages;
     }
 
-    public void setPositionMessages(Collection<PositionMessage> positionMessages) {
-        this.positionMessages = positionMessages;
-    }
-
     public void addPostitionMessage(PositionMessage message) {
         this.positionMessages.add(message);
-        msgStorage.saveMessage(message);
+    }
+
+    public Collection<IncidentMessage> getIncidentMessages() {
+        return incidentMessages;
+    }
+
+    public void addIncidentMessage(IncidentMessage incidentMessage) {
+        this.incidentMessages.add(incidentMessage);
     }
 
     public void clear(){
         positionMessages.clear();
+        incidentMessages.clear();
     }
 }

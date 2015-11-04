@@ -1,8 +1,8 @@
 package be.kdg.schelderadar.service;
 
-import be.kdg.schelderadar.domain.model.Cargo;
+import be.kdg.schelderadar.domain.ship.Cargo;
 import be.kdg.schelderadar.domain.JSONHandler;
-import be.kdg.schelderadar.domain.model.ShipInfo;
+import be.kdg.schelderadar.domain.ship.ShipInfo;
 import be.kdg.se3.proxy.ShipServiceProxy;
 
 import javax.json.JsonObject;

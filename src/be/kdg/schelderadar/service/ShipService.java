@@ -1,6 +1,6 @@
 package be.kdg.schelderadar.service;
 
-import be.kdg.schelderadar.domain.model.ShipInfo;
+import be.kdg.schelderadar.domain.ship.ShipInfo;
 
 /**
  * User: michaelkees
