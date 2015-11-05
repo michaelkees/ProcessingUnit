@@ -9,5 +9,5 @@ import org.exolab.castor.xml.ValidationException;
  */
 public interface MessageConverter {
     String convertJavaToXML(Object object) throws MarshalException, ValidationException;
-    Object convertXMLToJava(String XMLmessage, Object object) throws MarshalException, ValidationException;
+    Object convertXMLToJava(String XMLmessage, String classType) throws MarshalException, ValidationException;
 }

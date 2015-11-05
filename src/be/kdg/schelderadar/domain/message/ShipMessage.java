@@ -4,20 +4,16 @@ import java.util.Date;
 
 /**
  * User: michaelkees
- * Date: 31/10/15
+ * Date: 04/11/15
  */
-public class IncidentMessage{
-    private int shipId;
-    private Date timestamp;
-    private String type;
+public class ShipMessage {
+    int shipId;
+    Date timestamp;
 
-    public IncidentMessage() {
-    }
 
-    public IncidentMessage(int shipId, Date timestamp, String type) {
+    public ShipMessage(int shipId, Date timestamp) {
         this.shipId = shipId;
         this.timestamp = timestamp;
-        this.type = type;
     }
 
     public int getShipId() {
@@ -34,13 +30,5 @@ public class IncidentMessage{
 
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 }

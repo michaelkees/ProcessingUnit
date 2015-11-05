@@ -10,7 +10,6 @@ import java.util.*;
  * Date: 31/10/15
  */
 public class ETAgenerator {
-    private ArrayList<Date> ETAShips = new ArrayList<>();
     //private ArrayList<Ship> shipsForETAcalc = new ArrayList<>();
 
     //TODO: Hierbij moet kunnen ingesteld worden voor welke schepen men ETA’s wenst en
@@ -32,8 +31,8 @@ public class ETAgenerator {
     }
 
 
-    public Map<Ship, Long> getETAs(Map<Ship, ArrayList<PositionMessage>> shipMap) {
-         Map<Ship, Long> shipETAs = new TreeMap<>();
+    public NavigableMap<Ship, Long> getETAs(Map<Ship, ArrayList<PositionMessage>> shipMap) {
+         NavigableMap<Ship, Long> shipETAs = new TreeMap<>();
          for (Map.Entry<Ship, ArrayList<PositionMessage>> entry : shipMap.entrySet()) {
             if (entry.getValue().size() > 1) {
                 PositionMessage psOld = entry.getValue().get(entry.getValue().size()-2);
@@ -46,6 +45,14 @@ public class ETAgenerator {
             }
         }
         return shipETAs;
+    }
+
+    public Boolean isSpeeding(NavigableMap<Ship, ArrayList<PositionMessage>> shipMap){
+        NavigableMap<Ship, Long> shipETAs = getETAs(shipMap);
+        Map.Entry<Ship, Long> lastEntry = shipETAs.lastEntry();
+        System.out.println("SHIPETAS: " + shipETAs.size());
+        System.out.println("LAST ENTRY: " +lastEntry.getKey().getShipId() + " TIME: " + lastEntry.getValue());
+        return lastEntry.getValue() != 0;
     }
 
     private float calculateETA(int distance, float speedOfShip) {

@@ -3,24 +3,28 @@ package be.kdg.schelderadar.broker;
 
 import be.kdg.schelderadar.domain.message.*;
 
+import be.kdg.schelderadar.out.report.IncidentReport;
 import com.rabbitmq.client.*;
 import org.exolab.castor.xml.MarshalException;
+import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.ValidationException;
 
 import java.io.IOException;
+import java.io.StringWriter;
+import java.util.concurrent.TimeoutException;
 
 /**
  * User: michaelkees
  * Date: 31/10/15
  */
-public class RabbitMQReceiver implements MessageQueue {
+public class RabbitMQ implements MessageQueue {
     private final String QUEUE_NAME;
 
     private Consumer consumer;
     private Channel channel;
     private MessageAnalyzer msgAnalyzer;
 
-    public RabbitMQReceiver(String queueName, Channel channel, MessageAnalyzer msgAnalyzer) {
+    public RabbitMQ(String queueName, Channel channel, MessageAnalyzer msgAnalyzer) {
         this.QUEUE_NAME = queueName;
         this.channel = channel;
         this.msgAnalyzer = msgAnalyzer;
@@ -36,9 +40,7 @@ public class RabbitMQReceiver implements MessageQueue {
                             throws IOException {
                         try {
                             String message = new String(body, "UTF-8");
-
                             msgAnalyzer.analyzeMessage(message);
-
                         } catch (MarshalException | ValidationException e) {
                             throw new IOException("Error reading msg");
                         }
@@ -51,6 +53,19 @@ public class RabbitMQReceiver implements MessageQueue {
             }
         }
 
+    }
+
+    @Override
+    public void send(IncidentReport iReport) throws IOException, MarshalException, ValidationException {
+        StringWriter writer = new StringWriter();
+        Marshaller marshaller = new Marshaller(writer);
+        marshaller.marshal(iReport);
+        channel.basicPublish("", QUEUE_NAME, null, writer.toString().getBytes());
+    }
+
+    @Override
+    public void shutdown() throws IOException, TimeoutException {
+        this.channel.close();
     }
 
     public void setMsgAnalyzer(MessageAnalyzer msgAnalyzer) {

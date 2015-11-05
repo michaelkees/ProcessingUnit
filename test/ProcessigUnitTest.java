@@ -3,7 +3,7 @@ import be.kdg.schelderadar.domain.message.*;
 import be.kdg.schelderadar.domain.ProcessingUnit;
 import be.kdg.schelderadar.cache.ShipInfoCache;
 import be.kdg.schelderadar.broker.MQException;
-import be.kdg.schelderadar.broker.RabbitMQReceiver;
+import be.kdg.schelderadar.broker.RabbitMQ;
 import be.kdg.schelderadar.out.store.MessageStorage;
 import be.kdg.schelderadar.out.store.MessageStorageImpl;
 import be.kdg.schelderadar.service.ShipService;
@@ -12,6 +12,8 @@ import be.kdg.schelderadar.service.ShipServiceException;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import org.exolab.castor.xml.MarshalException;
+import org.exolab.castor.xml.ValidationException;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -21,9 +23,8 @@ import java.util.concurrent.TimeoutException;
  * Date: 31/10/15
  */
 public class ProcessigUnitTest {
-    private static final String QUEUE_NAME = "SHIPINFO";
 
-    public static void main(String[] args) throws MQException, ShipServiceException, IOException, TimeoutException {
+    public static void main(String[] args) throws MQException, ShipServiceException, IOException, TimeoutException, MarshalException, ValidationException {
         MessageStorage msgStorage = new MessageStorageImpl();
         MessageConverter messageConverter = new CastorMessageConverter();
         ShipMessageCollector shipMessageCollector = new ShipMessageCollector();
@@ -38,9 +39,10 @@ public class ProcessigUnitTest {
         Channel channel = connection.createChannel();
 
         MessageAnalyzer messageAnalyzer = new ShipMessageAnalyzer(messageConverter, shipMessageCollector);
-        MessageQueue messageQueue = new RabbitMQReceiver(QUEUE_NAME, channel, messageAnalyzer);
-
-        pu.setMessageQueue(messageQueue);
+        MessageQueue inMessageQueue = new RabbitMQ("SHIPINFO", channel, messageAnalyzer);
+        MessageQueue outMessageQueue = new RabbitMQ("REPORT", channel, messageAnalyzer);
+        pu.setInMessageQueue(inMessageQueue);
+        pu.setOutMessageQueue(outMessageQueue);
         pu.setShipService(shipService);
         pu.setTimeToInterrupt(50000);
         pu.setShipInfoCache(shipInfoCache);

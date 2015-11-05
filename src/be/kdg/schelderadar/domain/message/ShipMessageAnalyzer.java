@@ -19,13 +19,12 @@ public class ShipMessageAnalyzer implements MessageAnalyzer {
     @Override
     public void analyzeMessage(String message) throws MarshalException, ValidationException {
         if (message.contains("position")) {
-            PositionMessage ps = (PositionMessage) converter.convertXMLToJava(message, PositionMessage.class);
+            PositionMessage ps = (PositionMessage) converter.convertXMLToJava(message, PositionMessage.class.getSimpleName());
             shipMessageCollector.addPostitionMessage(ps);
 
         } else if (message.contains("incident")) {
-            IncidentMessage im = (IncidentMessage) converter.convertXMLToJava(message, IncidentMessage.class);
+            IncidentMessage im = (IncidentMessage) converter.convertXMLToJava(message, IncidentMessage.class.getSimpleName());
             shipMessageCollector.addIncidentMessage(im);
-
         }
 
     }

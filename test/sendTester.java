@@ -1,3 +1,4 @@
+import be.kdg.schelderadar.domain.message.IncidentMessage;
 import be.kdg.schelderadar.domain.message.PositionMessage;
 import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.Marshaller;
@@ -17,13 +18,20 @@ public class sendTester {
         //Marshaller.marshal(message, writer);
 
         PositionMessage message = new PositionMessage();
+        IncidentMessage incidentMessage = new IncidentMessage();
+
         message.setShipId(1234567);
+        message.setTimestamp(new Date());
         message.setCentraleId("Vlissingen");
         message.setAfstandTotLoskade(4350);
-        message.setTimestamp(new Date());
+
+        incidentMessage.setShipId(1234567);
+        incidentMessage.setTimestamp(new Date());
+        incidentMessage.setType("schade");
 
         Marshaller marshaller = new Marshaller(writer);
-        marshaller.marshal(message);
+
+        marshaller.marshal(incidentMessage);
         System.out.println(writer.toString());
     }
 }

@@ -1,6 +1,7 @@
 package be.kdg.schelderadar.domain.message;
 
 import be.kdg.schelderadar.out.store.MessageStorage;
+import javafx.geometry.Pos;
 
 import java.util.ArrayList;
 import java.util.Collection;

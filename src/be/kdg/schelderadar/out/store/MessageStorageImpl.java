@@ -3,7 +3,6 @@ package be.kdg.schelderadar.out.store;
 import be.kdg.schelderadar.domain.message.IncidentMessage;
 import be.kdg.schelderadar.domain.message.PositionMessage;
 import be.kdg.schelderadar.eta.ETAReport;
-import javafx.geometry.Pos;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -19,21 +18,17 @@ public class MessageStorageImpl implements MessageStorage {
     }
 
     @Override
-    public void saveMessage(Object object) {
-
-        System.out.println(((PositionMessage)object).getShipId());
-
-        //TODO CHECK OBJECT for print
-        if (object.equals(PositionMessage.class)) {
-
+    public void saveMessage(Object object, String classType) {
+        //TODO check object get class
+        if (classType.equals(PositionMessage.class.getSimpleName())) {
             PositionMessage ps = (PositionMessage) object;
-            System.out.printf("data %s: ship: %d distance: %d \n", df.format(ps.getTimestamp()), ps.getShipId(), ps.getAfstandTotLoskade());
+            System.out.printf("data %s - ship: %d distance: %d \n", df.format(ps.getTimestamp()), ps.getShipId(), ps.getAfstandTotLoskade());
 
-        } else if (object.equals(IncidentMessage.class)) {
+        } else if (classType.equals(IncidentMessage.class.getSimpleName())) {
             IncidentMessage im = (IncidentMessage) object;
-            System.out.printf("incident: ship: %d action: %s", im.getShipId(), im.getAction() );
+            System.out.printf("incident: ship: %d type: %s \n", im.getShipId(), im.getType() );
 
-        } else if (object.equals(ETAReport.class)) {
+        } else if (classType.equals(ETAReport.class.getSimpleName())) {
             ETAReport etAreport = (ETAReport) object;
             System.out.println(etAreport);
 

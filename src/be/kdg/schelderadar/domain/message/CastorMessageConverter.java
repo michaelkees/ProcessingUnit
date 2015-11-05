@@ -1,5 +1,6 @@
 package be.kdg.schelderadar.domain.message;
 
+import javafx.geometry.Pos;
 import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.Unmarshaller;
@@ -24,16 +25,14 @@ public class CastorMessageConverter implements MessageConverter {
     }
 
     @Override
-    public  Object convertXMLToJava(String XMLmessage, Object object) throws MarshalException, ValidationException {
+    public  Object convertXMLToJava(String XMLmessage, String classType) throws MarshalException, ValidationException {
         Reader reader = new StringReader(XMLmessage);
-
-        return (PositionMessage) Unmarshaller.unmarshal(PositionMessage.class, reader);
-        /*if(object.getClass().equals(PositionMessage.class)){
-            System.out.println("POSITION MESSAGE GETTING");
+        if(classType.equals(PositionMessage.class.getSimpleName())){
             return (PositionMessage) Unmarshaller.unmarshal(PositionMessage.class, reader);
-        } else {
+        } else if(classType.equals(IncidentMessage.class.getSimpleName())) {
             return (IncidentMessage) Unmarshaller.unmarshal(IncidentMessage.class, reader);
-        } */
+        }
+        return null;
     }
 
 }

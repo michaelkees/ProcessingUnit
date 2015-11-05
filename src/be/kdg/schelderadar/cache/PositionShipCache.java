@@ -5,6 +5,7 @@ import be.kdg.schelderadar.domain.ship.Ship;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.TreeMap;
 
 /**
@@ -12,7 +13,7 @@ import java.util.TreeMap;
  * Date: 02/11/15
  */
 public class PositionShipCache {
-    private Map<Ship, ArrayList<PositionMessage>> posMessages = new TreeMap<>();
+    private NavigableMap<Ship, ArrayList<PositionMessage>> posMessages = new TreeMap<>();
 
     public PositionShipCache() {
     }
@@ -41,7 +42,7 @@ public class PositionShipCache {
        }
     }
 
-    public Map<Ship, ArrayList<PositionMessage>> getPosMessages() {
+    public NavigableMap<Ship, ArrayList<PositionMessage>> getPosMessages() {
         return posMessages;
     }
 }

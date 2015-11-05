@@ -13,40 +13,48 @@ import java.util.Date;
 @XmlRootElement
 public class PositionMessage {
     private int shipId;
-    private String centraleId;
     private Date timestamp;
+    private String centraleId;
     private int afstandTotLoskade;
 
+    public PositionMessage() {
+    }
+
+    public PositionMessage(int shipId, Date timestamp, String centraleId, int afstandTotLoskade) {
+        this.shipId = shipId;
+        this.timestamp = timestamp;
+        this.centraleId = centraleId;
+        this.afstandTotLoskade = afstandTotLoskade;
+    }
 
     public int getShipId() {
         return shipId;
     }
 
-    public String getCentraleId() {
-        return centraleId;
+    public void setShipId(int shipId) {
+        this.shipId = shipId;
     }
 
     public Date getTimestamp() {
         return timestamp;
     }
 
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getCentraleId() {
+        return centraleId;
+    }
+
+    public void setCentraleId(String centraleId) {
+        this.centraleId = centraleId;
+    }
+
     public int getAfstandTotLoskade() {
         return afstandTotLoskade;
     }
 
-    @XmlElement
-    public void setShipId(int shipId) {
-        this.shipId = shipId;
-    }
-    @XmlElement
-    public void setCentraleId(String centraleId) {
-        this.centraleId = centraleId;
-    }
-    @XmlElement
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
-    }
-    @XmlElement
     public void setAfstandTotLoskade(int afstandTotLoskade) {
         this.afstandTotLoskade = afstandTotLoskade;
     }
