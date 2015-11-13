@@ -2,6 +2,7 @@ package be.kdg.schelderadar.cache;
 
 import be.kdg.schelderadar.domain.message.PositionMessage;
 import be.kdg.schelderadar.domain.ship.Ship;
+import javafx.geometry.Pos;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -19,27 +20,23 @@ public class PositionShipCache {
     }
 
     public void addPosMessage(Ship ship, PositionMessage ps) {
-        ArrayList<PositionMessage> psMsgs;
-       if(!posMessages.isEmpty()){
-           for (Map.Entry<Ship, ArrayList<PositionMessage>> entry : posMessages.entrySet()) {
-               if (entry.getKey().getShipId() == ship.getShipId()) {
+        boolean shipFound = false;
+        ArrayList<PositionMessage> posMsgs = new ArrayList<>();
 
-                   if (entry.getValue() != null) {
-                       psMsgs = entry.getValue();
-                   } else {
-                       psMsgs = new ArrayList<>();
-                   }
-                   psMsgs.add(ps);
-                   entry.setValue(psMsgs);
-               }
-
-           }
-       } else {
-           posMessages = new TreeMap<>();
-           psMsgs = new ArrayList<>();
-           psMsgs.add(ps);
-           posMessages.put(ship, psMsgs);
-       }
+        for (Map.Entry<Ship, ArrayList<PositionMessage>> shipWithPositionMessages : posMessages.entrySet()) {
+            if (!shipWithPositionMessages.getKey().equals(ship)) {
+                shipFound = false;
+            } else {
+                posMsgs = shipWithPositionMessages.getValue();
+                shipFound = true;
+            }
+        }
+        if (!shipFound) {
+            posMsgs.add(ps);
+            posMessages.put(ship, posMsgs);
+        } else {
+            posMessages.get(ship).add(ps);
+        }
     }
 
     public NavigableMap<Ship, ArrayList<PositionMessage>> getPosMessages() {

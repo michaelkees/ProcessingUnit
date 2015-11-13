@@ -1,3 +1,5 @@
+package parts;
+
 import be.kdg.schelderadar.domain.message.IncidentMessage;
 import be.kdg.schelderadar.domain.message.PositionMessage;
 import org.exolab.castor.xml.MarshalException;

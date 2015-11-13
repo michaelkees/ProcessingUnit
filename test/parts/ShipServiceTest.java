@@ -1,3 +1,5 @@
+package parts;
+
 import be.kdg.schelderadar.service.ShipServiceException;
 import be.kdg.schelderadar.service.ShipServiceApi;
 

@@ -1,3 +1,5 @@
+package parts;
+
 import be.kdg.schelderadar.broker.MessageQueue;
 import be.kdg.schelderadar.broker.RabbitMQ;
 import be.kdg.schelderadar.domain.message.MessageAnalyzer;

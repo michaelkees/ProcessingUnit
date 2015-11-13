@@ -12,20 +12,16 @@ import java.util.Date;
  */
 public class ETAReport {
     DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-    StringBuilder shipETAdata;
+    String shipETAdata="";
     Date timestamp;
 
     public ETAReport() {
         this.timestamp = new Date();
-        shipETAdata = new StringBuilder();
+
     }
 
-
     public void addShipETAData(Ship ship, Long eta){
-        shipETAdata.append(ship.getShipId());
-        shipETAdata.append(" ");
-        shipETAdata.append(String.valueOf(eta));
-        shipETAdata.append("\n");
+        shipETAdata += String.format("ship: %10d | ETA: %10d seconden\n", ship.getShipId(), eta);
     }
 
     public Date getTimestamp() {
@@ -38,6 +34,6 @@ public class ETAReport {
 
     @Override
     public String toString() {
-        return String.format("ETA data: %s \n %s", df.format(timestamp), shipETAdata.toString());
+        return String.format("ETA data: %s \n%s", df.format(timestamp), shipETAdata);
     }
 }

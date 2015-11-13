@@ -22,7 +22,7 @@ public class MessageStorageImpl implements MessageStorage {
         //TODO check object get class
         if (classType.equals(PositionMessage.class.getSimpleName())) {
             PositionMessage ps = (PositionMessage) object;
-            System.out.printf("data %s - ship: %d distance: %d \n", df.format(ps.getTimestamp()), ps.getShipId(), ps.getAfstandTotLoskade());
+            System.out.printf("data %s - ship: %d distance: %d zone: %s\n", df.format(ps.getTimestamp()), ps.getShipId(), ps.getAfstandTotLoskade(), ps.getCentraleId());
 
         } else if (classType.equals(IncidentMessage.class.getSimpleName())) {
             IncidentMessage im = (IncidentMessage) object;

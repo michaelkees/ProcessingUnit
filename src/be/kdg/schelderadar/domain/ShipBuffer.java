@@ -32,7 +32,7 @@ public class ShipBuffer implements ShipBufferListener {
 
     public void updateShip(Ship ship, int afstandTotLoskade) {
         for (Ship s : shipList) {
-            if (s.equals(ship)) {
+            if (s.getShipId() == ship.getShipId()) {
                 s.setAfstandTotLoskade(afstandTotLoskade);
                 long currentTime = new Date().getTime();
                 timeShipLastSignal.replace(s, currentTime);
@@ -49,19 +49,12 @@ public class ShipBuffer implements ShipBufferListener {
         return null;
     }
 
-    public void addShipInfo(ShipInfo shipInfo, Ship ship) {
-        for (Ship s : shipList) {
-            if (s.equals(ship)) {
-                s.setShipInfo(shipInfo);
-            }
-        }
-    }
 
     public Boolean hasShipInfo(Ship ship) {
         return ship.getShipInfo() != null;
     }
 
-    public Boolean exitsShip(int shipId) {
+    public Boolean existsShip(int shipId) {
         for (Ship s : shipList) {
             if (s.getShipId() == shipId) {
                 return true;
