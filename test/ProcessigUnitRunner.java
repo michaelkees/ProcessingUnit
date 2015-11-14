@@ -45,8 +45,9 @@ public class ProcessigUnitRunner {
 
         //ACTIONS FOR INCIDENT
         Map<String, String> actionByTypeMap = new HashMap<>();
-        actionByTypeMap.put("man overboord", "AlleSchepenVoorAnker");
-        actionByTypeMap.put("schade", "AlleSchepenInZoneVoorAnker");
+        actionByTypeMap.put("Man over boord", "AlleSchepenVoorAnker");
+        actionByTypeMap.put("Schade", "AlleSchepenInZoneVoorAnker");
+        actionByTypeMap.put("Medisch noodgeval", "AlleSchepenInZoneVoorAnker");
         actionByTypeMap.put("dangerous", "AlleSchepenVoorAnker"); //DEFAULT WAARDE -->  als er dangerous cargo is voor een type incident
         ActionCaller actionCaller = new ActionGenerator(actionByTypeMap);
 
@@ -106,10 +107,8 @@ public class ProcessigUnitRunner {
 
         //starten van processing unit voor test
 
-        try {
+
             pu.start();
-        } catch (MQException | ShipServiceException | ProcessingException | ActionCallerException e) {
-            System.out.println(e.getMessage());
-        }
+
     }
 }
