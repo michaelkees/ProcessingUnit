@@ -219,13 +219,13 @@ public class ProcessingUnit {
             ship.setShipInfo(collectShipInfo(ship.getShipId()));
             shipBuffer.addShip(ship);
         }
+        shipMessageMapper.addPosMessage(ship, ps);
         //CHECK if alertBuffering
         if (incidentAlert) {
             if (isShipMoving(ship)) {
                 reportShipBigOffense(ship); //bij overtredingen
             }
         }
-        shipMessageMapper.addPosMessage(ship, ps);
     }
 
     public Boolean isShipMoving(Ship ship) {
