@@ -13,10 +13,10 @@ import java.util.TreeMap;
  * User: michaelkees
  * Date: 02/11/15
  */
-public class PositionShipCache {
+public class ShipMessageMapper {
     private NavigableMap<Ship, ArrayList<PositionMessage>> posMessages = new TreeMap<>();
 
-    public PositionShipCache() {
+    public ShipMessageMapper() {
     }
 
     public void addPosMessage(Ship ship, PositionMessage ps) {

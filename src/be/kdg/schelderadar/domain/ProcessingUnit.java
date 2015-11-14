@@ -2,23 +2,26 @@ package be.kdg.schelderadar.domain;
 
 import be.kdg.schelderadar.broker.MessageQueue;
 import be.kdg.schelderadar.broker.MQException;
-import be.kdg.schelderadar.cache.PositionShipCache;
+import be.kdg.schelderadar.cache.ShipMessageMapper;
 import be.kdg.schelderadar.cache.ShipInfoCache;
 import be.kdg.schelderadar.domain.message.IncidentMessage;
 import be.kdg.schelderadar.domain.message.ShipMessageCollector;
 import be.kdg.schelderadar.domain.message.PositionMessage;
 import be.kdg.schelderadar.domain.ship.Ship;
 import be.kdg.schelderadar.domain.ship.ShipInfo;
+
 import be.kdg.schelderadar.eta.ETAReport;
 import be.kdg.schelderadar.eta.ETATime;
-import be.kdg.schelderadar.eta.ETAgenerator;
+import be.kdg.schelderadar.eta.ETACaller;
+import be.kdg.schelderadar.out.report.ActionCaller;
+import be.kdg.schelderadar.out.report.ActionCallerException;
 import be.kdg.schelderadar.out.report.IncidentReport;
 import be.kdg.schelderadar.out.store.MessageStorage;
 import be.kdg.schelderadar.service.ShipService;
 import be.kdg.schelderadar.service.ShipServiceException;
+import org.apache.log4j.Logger;
 import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.ValidationException;
-import org.omg.CORBA.portable.ApplicationException;
 
 import java.io.IOException;
 import java.util.*;
@@ -31,32 +34,34 @@ public class ProcessingUnit {
     private int timeToInterrupt = 100000; //DEFAULT
     private MessageQueue inMessageQueue;
     private MessageQueue outMessageQueue;
+    private final static Logger logger = Logger.getLogger(ProcessingUnit.class);
 
     private ShipService shipService;
     private boolean isReceiving;
     private boolean incidentAlert;
 
     private ShipMessageCollector msgCollector;
-
-    private ETAgenerator etaGenerator;  //OUTDATE
-
+    private ETATime etaTime;
+    private ETACaller etaCaller;
     private MessageStorage msgStorage;
 
     //collectors/cache classes
     private final ShipBuffer shipBuffer;
     private ShipInfoCache shipInfoCache;
-    private PositionShipCache positionShipCache;
+    private ShipMessageMapper shipMessageMapper;
+
+    private ActionCaller actionCaller;
 
     //ETA GENERATION
     private ArrayList<Integer> shipIdsForETA = new ArrayList<>();
 
-    public ProcessingUnit(ShipMessageCollector msgCollector, MessageStorage storage) {
+    public ProcessingUnit(ShipMessageCollector msgCollector, MessageStorage storage, ActionCaller actionCaller) {
         this.shipBuffer = new ShipBuffer(timeToInterrupt);
         this.isReceiving = false;
         this.msgCollector = msgCollector;
-
-        this.etaGenerator = new ETAgenerator(ETATime.NORMAL); //DEFAULT
-        this.positionShipCache = new PositionShipCache();
+        this.actionCaller = actionCaller;
+        //DEFAULT
+        this.shipMessageMapper = new ShipMessageMapper();
         this.msgStorage = storage;
         this.incidentAlert = false;
     }
@@ -65,11 +70,19 @@ public class ProcessingUnit {
         this.shipIdsForETA = shipIdsForETA;
     }
 
-    public void start() throws MQException, ShipServiceException {
+    public void start() {
         isReceiving = true;
         while (isReceiving) {
-            inMessageQueue.init();
-            performCollect();
+            try {
+                inMessageQueue.init();
+            } catch (MQException e) {
+                e.printStackTrace();
+            }
+            try {
+                performCollect();
+            } catch (ShipServiceException | ActionCallerException e) {
+                logger.error(e.getMessage());
+            }
             checkBufferedShipSignal();
             checkCacheClear();
             checkETAgeneration();
@@ -77,7 +90,7 @@ public class ProcessingUnit {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                //throw new ApplicationException()
+                logger.error("Error during sleeping thread (1000)");
             }
         }
     }
@@ -88,38 +101,42 @@ public class ProcessingUnit {
 
     private void checkETAgeneration() {
         ArrayList<Integer> shipIds = new ArrayList<>();
-        switch (etaGenerator.getEtaTime()) {
-            case NORMAL:
-                if (!shipIdsForETA.isEmpty() && !msgCollector.getPositionMessages().isEmpty()) {
-                    if (!shipBuffer.getShipList().isEmpty()) {
-                        shipIds.addAll(shipIdsForETA);
+        if(etaTime!=null) {
+            switch (etaTime) {
+                case NORMAL:
+                    if (!shipIdsForETA.isEmpty() && !msgCollector.getPositionMessages().isEmpty()) {
+                        if (!shipBuffer.getShipList().isEmpty()) {
+                            shipIds.addAll(shipIdsForETA);
+                        }
                     }
-                }
-                break;
-            case POSITION:
-                if (!msgCollector.getPositionMessages().isEmpty()) {
-                    for (PositionMessage ps : msgCollector.getPositionMessages()) {
-                        shipIds.add(ps.getShipId());
+                    break;
+                case POSITION:
+                    if (!msgCollector.getPositionMessages().isEmpty()) {
+                        for (PositionMessage ps : msgCollector.getPositionMessages()) {
+                            shipIds.add(ps.getShipId());
+                        }
                     }
-                }
-                break;
-            case ZONE:
-                if (!msgCollector.getPositionMessages().isEmpty()) {
+                    break;
+                case ZONE:
+                    if (!msgCollector.getPositionMessages().isEmpty()) {
 
-                    for (PositionMessage ps : msgCollector.getPositionMessages()) {
-                        if (positionShipCache.getPosMessages().get(shipBuffer.getShip(ps.getShipId())).size() > 1) {
-                            ArrayList<PositionMessage> shipMessages = positionShipCache.getPosMessages().get(shipBuffer.getShip(ps.getShipId()));
-                            String prevZone = shipMessages.get(shipMessages.size() - 2).getCentraleId();
-                            String currZone = shipMessages.get(shipMessages.size() - 1).getCentraleId();
-                            if (!prevZone.equals(currZone)) {
-                                shipIds.add(ps.getShipId());
+                        for (PositionMessage ps : msgCollector.getPositionMessages()) {
+                            if (shipMessageMapper.getPosMessages().get(shipBuffer.getShip(ps.getShipId())).size() > 1) {
+                                ArrayList<PositionMessage> shipMessages = shipMessageMapper.getPosMessages().get(shipBuffer.getShip(ps.getShipId()));
+                                String prevZone = shipMessages.get(shipMessages.size() - 2).getCentraleId();
+                                String currZone = shipMessages.get(shipMessages.size() - 1).getCentraleId();
+                                if (!prevZone.equals(currZone)) {
+                                    shipIds.add(ps.getShipId());
+                                }
                             }
                         }
                     }
-                }
-        }
-        if (!shipIds.isEmpty()) {
-            doETAgeneration(shipIds);
+            }
+            if (!shipIds.isEmpty()) {
+                doETAgeneration(shipIds);
+            }
+        } else {
+            logger.warn("ETATime not created/set");
         }
 
     }
@@ -136,11 +153,11 @@ public class ProcessingUnit {
         for (Integer shipId : shipIds) {
             if (shipBuffer.existsShip(shipId)) {
                 Ship s = shipBuffer.getShip(shipId);
-                shipMap.put(s, positionShipCache.getPosMessages().get(s));
+                shipMap.put(s, shipMessageMapper.getPosMessages().get(s));
             }
         }
         if (!shipMap.isEmpty()) {
-            Map<Ship, Long> shipETAs = etaGenerator.getETAs(shipMap);
+            Map<Ship, Long> shipETAs = etaCaller.calculateEstimatedTimeOfArrivalsMap(shipMap);
             if (!shipETAs.isEmpty()) {
                 for (Map.Entry<Ship, Long> entry : shipETAs.entrySet()) {
                     report.addShipETAData(entry.getKey(), entry.getValue());
@@ -159,12 +176,13 @@ public class ProcessingUnit {
         shipBuffer.checkSignalShip();
     }
 
-    public void performCollect() throws ShipServiceException {
+    public void performCollect() throws ShipServiceException, ActionCallerException {
         if (!msgCollector.getPositionMessages().isEmpty()) {
             for (PositionMessage ps : msgCollector.getPositionMessages()) {
                 try {
                     bufferShip(ps);
                 } catch (MarshalException | IOException | ValidationException e) {
+                    logger.error("Error during buffering ship");
                     throw new ShipServiceException(e.getMessage(), e);
                 }
                 msgStorage.saveMessage(ps, PositionMessage.class.getSimpleName());
@@ -178,7 +196,12 @@ public class ProcessingUnit {
                 try {
                     reportIncident(im);
                 } catch (MarshalException | IOException | ValidationException e) {
+                    logger.error("Error during reporting incident message");
                     throw new ShipServiceException(e.getMessage(), e);
+                } catch (ActionCallerException e) {
+                    logger.error("Error during getting action incident");
+                    throw new ActionCallerException(e.getMessage(), e);
+
                 }
                 msgStorage.saveMessage(im, IncidentMessage.class.getSimpleName());
             }
@@ -202,13 +225,13 @@ public class ProcessingUnit {
                 reportShipBigOffense(ship); //bij overtredingen
             }
         }
-        positionShipCache.addPosMessage(ship, ps);
+        shipMessageMapper.addPosMessage(ship, ps);
     }
 
     public Boolean isShipMoving(Ship ship) {
         NavigableMap<Ship, ArrayList<PositionMessage>> shipPositions = new TreeMap<>();
-        shipPositions.put(shipBuffer.getShip(ship.getShipId()), positionShipCache.getPosMessages().get(ship));
-        return this.etaGenerator.analyzeSpeedShip(shipPositions);
+        shipPositions.put(shipBuffer.getShip(ship.getShipId()), shipMessageMapper.getPosMessages().get(ship));
+        return this.etaCaller.analyzeSpeedShip(shipPositions);
     }
 
     public ShipInfo collectShipInfo(int shipId) throws ShipServiceException {
@@ -217,7 +240,7 @@ public class ProcessingUnit {
         return shipInfo;
     }
 
-    private void reportIncident(IncidentMessage im) throws MarshalException, IOException, ValidationException {
+    private void reportIncident(IncidentMessage im) throws MarshalException, IOException, ValidationException, ActionCallerException {
         if (!incidentAlert) {
             IncidentReport report = new IncidentReport();
 
@@ -225,7 +248,7 @@ public class ProcessingUnit {
                 Ship ship = shipBuffer.getShip(im.getShipId());
                 report.setShip(ship);
                 report.setType(im.getType());
-                report.setAction(generateAction(im.getType(), ship));
+                report.setAction(generateAction(im.getType(), ship.getShipInfo().isDangereousCargo()));
                 alertBuffering(true);
             }
 
@@ -245,23 +268,18 @@ public class ProcessingUnit {
         this.incidentAlert = alert;
     }
 
-    //ACTION GENERATOR KLASSE
-    private String generateAction(String type, Ship ship) {
-        String action = "";
-        if (type.equals("schade")) {
-            action = "AlleSchepenInZoneVoorAnker";
-            if (ship.getShipInfo().isDangereousCargo()) {
-                action = "AlleSchepenVoorAnker";
-            }
-        } else if (type.equals("man overboord")) {
-            action = "AlleSchepenVoorAnker";
+    private String generateAction(String type, Boolean dangerousCargo) throws ActionCallerException {
+        if(actionCaller!=null){
+            return actionCaller.getAction(type, dangerousCargo);
+        } else {
+            throw new ActionCallerException("ActionCaller never created.", new Throwable("ACTIONCALLER CREATION ERROR"));
         }
-        return action;
     }
-    ////
 
+
+    //adjustable setters for processingUnit
     public void setEtaTime(ETATime etaTime) {
-        this.etaGenerator.setEtaTime(etaTime);
+        this.etaTime = etaTime;
     }
 
     public void setShipInfoCache(ShipInfoCache shipInfoCache) {
@@ -284,4 +302,11 @@ public class ProcessingUnit {
         this.shipService = shipService;
     }
 
+    public void setEtaCaller(ETACaller etaCaller) {
+        this.etaCaller = etaCaller;
+    }
+
+    public void setActionCaller(ActionCaller actionCaller) {
+        this.actionCaller = actionCaller;
+    }
 }

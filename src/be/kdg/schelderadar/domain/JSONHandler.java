@@ -9,7 +9,7 @@ import java.io.StringReader;
  * User: michaelkees
  * Date: 31/10/15
  */
-public class JSONHandler {
+public class JsonHandler {
     public static JsonObject handleJSON(String jsonString){
         JsonReader jsonReader = Json.createReader(new StringReader(jsonString));
         JsonObject jsonObject = jsonReader.readObject();

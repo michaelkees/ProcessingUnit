@@ -1,9 +1,10 @@
 package be.kdg.schelderadar.service;
 
 import be.kdg.schelderadar.domain.ship.Cargo;
-import be.kdg.schelderadar.domain.JSONHandler;
+import be.kdg.schelderadar.domain.JsonHandler;
 import be.kdg.schelderadar.domain.ship.ShipInfo;
 import be.kdg.se3.proxy.ShipServiceProxy;
+import org.apache.log4j.Logger;
 
 import javax.json.JsonObject;
 import javax.json.JsonValue;
@@ -16,6 +17,8 @@ import java.io.IOException;
 public class ShipServiceApi implements ShipService {
     private ShipServiceProxy proxy;
     private String url;
+    private final static Logger logger = Logger.getLogger(ShipServiceApi.class);
+
 
     public ShipServiceApi(String url) {
         proxy = new ShipServiceProxy();
@@ -25,9 +28,10 @@ public class ShipServiceApi implements ShipService {
     public ShipInfo getShipInfo(int shipId) throws ShipServiceException {
         try {
             String shipInfoJson = proxy.get(url + shipId);
-            JsonObject shipObject = JSONHandler.handleJSON(shipInfoJson);
+            JsonObject shipObject = JsonHandler.handleJSON(shipInfoJson);
 
             if(shipObject.containsKey("error")){
+                logger.warn("Error message during converting json to ShipInfo-Object");
                 throw new ShipServiceException(shipObject.getString("description"), new Throwable(shipObject.getString("error")));
             } else {
                 ShipInfo shipInfo = new ShipInfo();
@@ -49,6 +53,7 @@ public class ShipServiceApi implements ShipService {
                 return shipInfo;
             }
         } catch (IOException e) {
+            logger.error("Error during converting message to ShipInfo");
             throw new ShipServiceException(e.getMessage(), e);
         }
     }

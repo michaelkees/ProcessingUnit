@@ -5,6 +5,7 @@ import be.kdg.schelderadar.domain.message.*;
 
 import be.kdg.schelderadar.out.report.IncidentReport;
 import com.rabbitmq.client.*;
+import org.apache.log4j.Logger;
 import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.ValidationException;
@@ -19,6 +20,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class RabbitMQ implements MessageQueue {
     private final String QUEUE_NAME;
+    private final static Logger logger = Logger.getLogger(RabbitMQ.class);
 
     private Consumer consumer;
     private Channel channel;
@@ -42,13 +44,15 @@ public class RabbitMQ implements MessageQueue {
                             String message = new String(body, "UTF-8");
                             msgAnalyzer.analyzeMessage(message);
                         } catch (MarshalException | ValidationException e) {
-                            throw new IOException("Error reading msg");
+                            logger.error("Unexpected error during converting message (Marshaller)");
+                            throw new IOException("Error converting messages", e.getCause());
                         }
                     }
                 };
                 this.channel.basicConsume(QUEUE_NAME, true, consumer);
             } catch (IOException e) {
                 this.consumer = null;
+                logger.error("Unexpected error during connecting to Message Queue (SERVER)");
                 throw new MQException(e.getMessage(), e);
             }
         }

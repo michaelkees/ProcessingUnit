@@ -1,4 +1,4 @@
-package parts;
+package testers;
 
 import be.kdg.schelderadar.domain.message.IncidentMessage;
 import be.kdg.schelderadar.domain.message.PositionMessage;

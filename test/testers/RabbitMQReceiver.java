@@ -1,4 +1,4 @@
-package parts;
+package testers;
 
 import be.kdg.schelderadar.broker.MQException;
 import be.kdg.schelderadar.broker.MessageQueue;

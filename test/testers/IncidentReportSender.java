@@ -1,9 +1,7 @@
-package parts;
+package testers;
 
 import be.kdg.schelderadar.broker.MessageQueue;
 import be.kdg.schelderadar.broker.RabbitMQ;
-import be.kdg.schelderadar.domain.message.MessageAnalyzer;
-import be.kdg.schelderadar.domain.message.ShipMessageAnalyzer;
 import be.kdg.schelderadar.domain.ship.Ship;
 import be.kdg.schelderadar.domain.ship.ShipInfo;
 import be.kdg.schelderadar.out.report.IncidentReport;

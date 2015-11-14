@@ -9,22 +9,13 @@ import java.util.*;
  * User: michaelkees
  * Date: 31/10/15
  */
-public class ETAgenerator {
-    private ETATime etaTime;
 
-    public ETAgenerator(ETATime etaTime) {
-        this.etaTime = etaTime;
-    }
+//TODO: interface creeren ,
+// later andere opties mogelijk
+public class ETAGenerator implements ETACaller {
 
-    public ETATime getEtaTime() {
-        return etaTime;
-    }
-
-    public void setEtaTime(ETATime etaTime) {
-        this.etaTime = etaTime;
-    }
-
-    public NavigableMap<Ship, Long> getETAs(Map<Ship, ArrayList<PositionMessage>> shipMap) {
+    @Override
+    public NavigableMap<Ship, Long> calculateEstimatedTimeOfArrivalsMap(Map<Ship, ArrayList<PositionMessage>> shipMap) {
          NavigableMap<Ship, Long> shipETAs = new TreeMap<>();
          for (Map.Entry<Ship, ArrayList<PositionMessage>> entry : shipMap.entrySet()) {
             if ((!entry.getValue().isEmpty()) && entry.getValue().size() > 1) {
@@ -40,12 +31,15 @@ public class ETAgenerator {
         return shipETAs;
     }
 
+    @Override
     public Boolean analyzeSpeedShip(NavigableMap<Ship, ArrayList<PositionMessage>> shipMap){
-        NavigableMap<Ship, Long> shipETAs = getETAs(shipMap);
+        NavigableMap<Ship, Long> shipETAs = calculateEstimatedTimeOfArrivalsMap(shipMap);
         Map.Entry<Ship, Long> lastEntry = shipETAs.lastEntry();
         return lastEntry.getValue() != 0;
     }
 
+
+    //
     private float calculateETA(int distance, float speedOfShip) {
         return distance / speedOfShip;
     }
