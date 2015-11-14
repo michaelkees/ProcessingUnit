@@ -106,9 +106,7 @@ public class ProcessigUnitRunner {
 
 
         //starten van processing unit voor test
-
-
-            pu.start();
+        pu.start();
 
     }
 }
