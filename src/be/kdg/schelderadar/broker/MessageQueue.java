@@ -13,13 +13,13 @@ import java.util.concurrent.TimeoutException;
  */
 public interface MessageQueue {
     /**
-     *
+     * initializing the consumer and handle incoming messages from the message queue
      * @throws MQException
      */
     void init() throws MQException;
 
     /**
-     *
+     * sending xml message to the message queue, especially incident reports
      * @param incidentReport
      * @throws IOException
      * @throws MarshalException
@@ -28,7 +28,7 @@ public interface MessageQueue {
     void send(IncidentReport incidentReport) throws IOException, MarshalException, ValidationException;
 
     /**
-     *
+     * shutdown the message queue
      * @throws IOException
      * @throws TimeoutException
      */

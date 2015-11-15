@@ -8,7 +8,7 @@ import be.kdg.schelderadar.domain.message.PositionMessage;
  */
 public interface MessageStorage {
     /**
-     *
+     * printing message to system out
      * @param message
      * @param classType
      */

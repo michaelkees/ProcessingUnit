@@ -8,7 +8,7 @@ import be.kdg.schelderadar.domain.ship.ShipInfo;
  */
 public interface ShipService {
     /**
-     *
+     * getting the ship information (proxy service)
      * @param shipId
      * @return
      * @throws ShipServiceException

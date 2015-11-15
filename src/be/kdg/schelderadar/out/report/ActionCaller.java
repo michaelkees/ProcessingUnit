@@ -8,7 +8,8 @@ import be.kdg.schelderadar.domain.ship.Ship;
  */
 public interface ActionCaller {
     /**
-     *
+     * Getting an action for a type.
+     * (If dangerousCargo true --> 'AlleSchepenVoorAnker')
      * @param type
      * @param dangerousCargo
      * @return
@@ -16,7 +17,7 @@ public interface ActionCaller {
     String getAction(String type, Boolean dangerousCargo);
 
     /**
-     *
+     * adding an action for a type. (adjustable list)
      * @param type
      * @param action
      */

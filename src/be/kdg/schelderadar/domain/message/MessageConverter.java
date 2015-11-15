@@ -9,7 +9,7 @@ import org.exolab.castor.xml.ValidationException;
  */
 public interface MessageConverter {
     /**
-     *
+     *  converting an object to xml with the marshaller
      * @param object
      * @return
      * @throws MarshalException
@@ -18,7 +18,7 @@ public interface MessageConverter {
     String convertJavaToXML(Object object) throws MarshalException, ValidationException;
 
     /**
-     *
+     * converting the xml tot an object with the unmarshaller
      * @param XMLmessage
      * @param classType
      * @return

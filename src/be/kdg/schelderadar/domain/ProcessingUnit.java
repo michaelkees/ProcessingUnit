@@ -292,8 +292,6 @@ public class ProcessingUnit {
         this.etaTime = etaTime;
     }
 
-
-
     public void setTimeToInterrupt(int timeToInterrupt) {
         this.timeToInterrupt = timeToInterrupt;
     }
