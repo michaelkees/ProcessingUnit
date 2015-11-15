@@ -191,16 +191,17 @@ public class ProcessingUnit {
                     alertBuffering(false);
                     currentActionProcessingBuffer="";
                     currentIncidentZone="";
-                }
-                try {
-                    reportIncident(im);
-                } catch (MarshalException | IOException | ValidationException e) {
-                    logger.error("Error during reporting incident message");
-                    throw new ShipServiceException(e.getMessage(), e);
-                } catch (ActionCallerException e) {
-                    logger.error("Error during getting action incident");
-                    throw new ActionCallerException(e.getMessage(), e);
+                } else {
+                    try {
+                        reportIncident(im);
+                    } catch (MarshalException | IOException | ValidationException e) {
+                        logger.error("Error during reporting incident message");
+                        throw new ShipServiceException(e.getMessage(), e);
+                    } catch (ActionCallerException e) {
+                        logger.error("Error during getting action incident");
+                        throw new ActionCallerException(e.getMessage(), e);
 
+                    }
                 }
                 msgStorage.saveMessage(im, IncidentMessage.class.getSimpleName());
             }
