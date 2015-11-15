@@ -70,12 +70,12 @@ public class ProcessingUnit {
 
     public void start() {
         isReceiving = true;
+        try {
+            inMessageQueue.init();
+        } catch (MQException e) {
+            logger.error(e.getMessage());
+        }
         while (isReceiving) {
-            try {
-                inMessageQueue.init();
-            } catch (MQException e) {
-                logger.error(e.getMessage());
-            }
             try {
                 performCollect();
             } catch (ShipServiceException | ActionCallerException e) {
