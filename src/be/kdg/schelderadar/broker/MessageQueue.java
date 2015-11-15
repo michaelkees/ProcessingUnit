@@ -17,7 +17,21 @@ public interface MessageQueue {
      * @throws MQException
      */
     void init() throws MQException;
+
+    /**
+     *
+     * @param incidentReport
+     * @throws IOException
+     * @throws MarshalException
+     * @throws ValidationException
+     */
     void send(IncidentReport incidentReport) throws IOException, MarshalException, ValidationException;
+
+    /**
+     *
+     * @throws IOException
+     * @throws TimeoutException
+     */
     void shutdown() throws IOException, TimeoutException;
 
 }

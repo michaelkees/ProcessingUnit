@@ -3,7 +3,7 @@ package be.kdg.schelderadar.domain;
 import be.kdg.schelderadar.broker.MessageQueue;
 import be.kdg.schelderadar.broker.MQException;
 import be.kdg.schelderadar.cache.ShipMessageMapper;
-import be.kdg.schelderadar.cache.ShipInfoCache;
+
 import be.kdg.schelderadar.domain.message.IncidentMessage;
 import be.kdg.schelderadar.domain.message.ShipMessageCollector;
 import be.kdg.schelderadar.domain.message.PositionMessage;
@@ -32,6 +32,9 @@ import java.util.*;
 
 public class ProcessingUnit {
     private int timeToInterrupt = 100000; //DEFAULT
+    private int timeToClearCache = 500000; //DEFAULT
+    private String currentActionProcessingBuffer;
+    private String currentIncidentZone;
     private MessageQueue inMessageQueue;
     private MessageQueue outMessageQueue;
     private final static Logger logger = Logger.getLogger(ProcessingUnit.class);
@@ -47,22 +50,17 @@ public class ProcessingUnit {
 
     //collectors/cache classes
     private final ShipBuffer shipBuffer;
-    private ShipInfoCache shipInfoCache;
-    private ShipMessageMapper shipMessageMapper;
 
     private ActionCaller actionCaller;
-
-    //ETA GENERATION
     private ArrayList<Integer> shipIdsForETA = new ArrayList<>();
 
     public ProcessingUnit(ShipMessageCollector msgCollector, MessageStorage storage, ActionCaller actionCaller) {
-        this.shipBuffer = new ShipBuffer(timeToInterrupt);
-        this.isReceiving = false;
+        this.shipBuffer = new ShipBuffer(timeToInterrupt, new ShipMessageMapper(timeToClearCache));
         this.msgCollector = msgCollector;
         this.actionCaller = actionCaller;
-        //DEFAULT
-        this.shipMessageMapper = new ShipMessageMapper();
         this.msgStorage = storage;
+
+        this.isReceiving = false;
         this.incidentAlert = false;
     }
 
@@ -76,7 +74,7 @@ public class ProcessingUnit {
             try {
                 inMessageQueue.init();
             } catch (MQException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage());
             }
             try {
                 performCollect();
@@ -119,10 +117,9 @@ public class ProcessingUnit {
                     break;
                 case ZONE:
                     if (!msgCollector.getPositionMessages().isEmpty()) {
-
                         for (PositionMessage ps : msgCollector.getPositionMessages()) {
-                            if (shipMessageMapper.getPosMessages().get(shipBuffer.getShip(ps.getShipId())).size() > 1) {
-                                ArrayList<PositionMessage> shipMessages = shipMessageMapper.getPosMessages().get(shipBuffer.getShip(ps.getShipId()));
+                            if (shipBuffer.getShipMessageMapper().getShipPositionMessages().get(shipBuffer.getShip(ps.getShipId())).size() > 1) {
+                                ArrayList<PositionMessage> shipMessages = shipBuffer.getShipMessageMapper().getShipPositionMessages().get(shipBuffer.getShip(ps.getShipId()));
                                 String prevZone = shipMessages.get(shipMessages.size() - 2).getCentraleId();
                                 String currZone = shipMessages.get(shipMessages.size() - 1).getCentraleId();
                                 if (!prevZone.equals(currZone)) {
@@ -153,7 +150,7 @@ public class ProcessingUnit {
         for (Integer shipId : shipIds) {
             if (shipBuffer.existsShip(shipId)) {
                 Ship s = shipBuffer.getShip(shipId);
-                shipMap.put(s, shipMessageMapper.getPosMessages().get(s));
+                shipMap.put(s, shipBuffer.getShipMessageMapper().getShipPositionMessages().get(s));
             }
         }
         if (!shipMap.isEmpty()) {
@@ -169,7 +166,7 @@ public class ProcessingUnit {
     }
 
     private void checkCacheClear() {
-        shipInfoCache.checkCacheClear();
+        shipBuffer.getShipMessageMapper().checkCacheClear();
     }
 
     private void checkBufferedShipSignal() {
@@ -192,6 +189,8 @@ public class ProcessingUnit {
             for (IncidentMessage im : msgCollector.getIncidentMessages()) {
                 if (im.getType().equals("alles normaal")) {
                     alertBuffering(false);
+                    currentActionProcessingBuffer="";
+                    currentIncidentZone="";
                 }
                 try {
                     reportIncident(im);
@@ -219,9 +218,11 @@ public class ProcessingUnit {
             ship.setShipInfo(collectShipInfo(ship.getShipId()));
             shipBuffer.addShip(ship);
         }
-        shipMessageMapper.addPosMessage(ship, ps);
-        //CHECK if alertBuffering
+
+        shipBuffer.getShipMessageMapper().addPosMessage(ship, ps);
+
         if (incidentAlert) {
+
             if (isShipMoving(ship)) {
                 reportShipBigOffense(ship); //bij overtredingen
             }
@@ -229,15 +230,20 @@ public class ProcessingUnit {
     }
 
     public Boolean isShipMoving(Ship ship) {
-        NavigableMap<Ship, ArrayList<PositionMessage>> shipPositions = new TreeMap<>();
-        shipPositions.put(shipBuffer.getShip(ship.getShipId()), shipMessageMapper.getPosMessages().get(ship));
-        return this.etaCaller.analyzeSpeedShip(shipPositions);
+        if(currentActionProcessingBuffer.contains("Zone") && ship.getCentraleId().equals(currentIncidentZone)){
+            NavigableMap<Ship, ArrayList<PositionMessage>> shipPositions = new TreeMap<>();
+            shipPositions.put(shipBuffer.getShip(ship.getShipId()), shipBuffer.getShipMessageMapper().getShipPositionMessages().get(ship));
+            return this.etaCaller.analyzeSpeedShip(shipPositions);
+        } else if(!currentActionProcessingBuffer.contains("Zone")){
+            NavigableMap<Ship, ArrayList<PositionMessage>> shipPositions = new TreeMap<>();
+            shipPositions.put(shipBuffer.getShip(ship.getShipId()), shipBuffer.getShipMessageMapper().getShipPositionMessages().get(ship));
+            return this.etaCaller.analyzeSpeedShip(shipPositions);
+        }
+        return false;
     }
 
     public ShipInfo collectShipInfo(int shipId) throws ShipServiceException {
-        ShipInfo shipInfo = shipService.getShipInfo(shipId);
-        shipInfoCache.cacheShipInfo(shipId, shipInfo);
-        return shipInfo;
+        return shipService.getShipInfo(shipId);
     }
 
     private void reportIncident(IncidentMessage im) throws MarshalException, IOException, ValidationException, ActionCallerException {
@@ -250,6 +256,9 @@ public class ProcessingUnit {
                 report.setType(im.getType());
                 report.setAction(generateAction(im.getType(), ship.getShipInfo().isDangereousCargo()));
                 alertBuffering(true);
+
+                currentActionProcessingBuffer = report.getAction();
+                currentIncidentZone = shipBuffer.getShip(im.getShipId()).getCentraleId();
             }
 
             outMessageQueue.send(report);
@@ -261,6 +270,7 @@ public class ProcessingUnit {
         report.setShip(ship);
         report.setType("");
         report.setAction("ZwareOvertreding");
+        currentActionProcessingBuffer = report.getAction();
         outMessageQueue.send(report);
     }
 
@@ -282,9 +292,7 @@ public class ProcessingUnit {
         this.etaTime = etaTime;
     }
 
-    public void setShipInfoCache(ShipInfoCache shipInfoCache) {
-        this.shipInfoCache = shipInfoCache;
-    }
+
 
     public void setTimeToInterrupt(int timeToInterrupt) {
         this.timeToInterrupt = timeToInterrupt;
@@ -308,5 +316,9 @@ public class ProcessingUnit {
 
     public void setActionCaller(ActionCaller actionCaller) {
         this.actionCaller = actionCaller;
+    }
+
+    public void setTimeToClearCache(int timeToClearCache) {
+        this.timeToClearCache = timeToClearCache;
     }
 }

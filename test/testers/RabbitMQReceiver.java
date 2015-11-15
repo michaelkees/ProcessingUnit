@@ -33,7 +33,7 @@ public class RabbitMQReceiver {
         MessageAnalyzer messageAnalyzer = new ShipMessageAnalyzer(messageConverter, collector);
 
 
-        MessageQueue inMessageQueue = new RabbitMQ("SHIPINFO", channel, messageAnalyzer);
+        MessageQueue inMessageQueue = new RabbitMQ("SHIPINFO", channel, messageAnalyzer, messageConverter);
 
         isReceiving = true;
         while (isReceiving) {

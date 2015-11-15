@@ -1,5 +1,6 @@
 package be.kdg.schelderadar.domain;
 
+import be.kdg.schelderadar.cache.ShipMessageMapper;
 import be.kdg.schelderadar.domain.ship.Ship;
 import be.kdg.schelderadar.domain.ship.ShipInfo;
 
@@ -9,14 +10,17 @@ import java.util.*;
  * User: michaelkees
  * Date: 31/10/15
  */
-public class ShipBuffer implements ShipBufferListener {
+public class ShipBuffer {
+    private ShipMessageMapper shipMessageMapper;
     private final ArrayList<Ship> shipList = new ArrayList<>();
     private Map<Ship, Long> timeShipLastSignal = new TreeMap<>();
     private int timeInterruptShipBuffering;
 
-    public ShipBuffer(int timeInterruptShipBuffering) {
+    public ShipBuffer(int timeInterruptShipBuffering, ShipMessageMapper shipMessageMapper) {
         this.timeInterruptShipBuffering = timeInterruptShipBuffering;
+        this.shipMessageMapper = shipMessageMapper;
     }
+
 
     public void addShip(Ship ship) {
         if (!shipList.contains(ship)) {
@@ -24,10 +28,6 @@ public class ShipBuffer implements ShipBufferListener {
             long currentTime = new Date().getTime();
             timeShipLastSignal.put(ship, currentTime);
         }
-    }
-
-    public Collection<Ship> getShipList() {
-        return shipList;
     }
 
     public void updateShip(Ship ship, int afstandTotLoskade) {
@@ -47,11 +47,6 @@ public class ShipBuffer implements ShipBufferListener {
             }
         }
         return null;
-    }
-
-
-    public Boolean hasShipInfo(Ship ship) {
-        return ship.getShipInfo() != null;
     }
 
     public Boolean existsShip(int shipId) {
@@ -79,6 +74,30 @@ public class ShipBuffer implements ShipBufferListener {
             }
 
         }
+    }
+
+    public Collection<Ship> getShipList() {
+        return shipList;
+    }
+    
+    public Boolean hasShipInfo(Ship ship) {
+        return ship.getShipInfo() != null;
+    }
+
+    public ShipMessageMapper getShipMessageMapper() {
+        return shipMessageMapper;
+    }
+
+    public void setShipMessageMapper(ShipMessageMapper shipMessageMapper) {
+        this.shipMessageMapper = shipMessageMapper;
+    }
+
+    public int getTimeInterruptShipBuffering() {
+        return timeInterruptShipBuffering;
+    }
+
+    public void setTimeInterruptShipBuffering(int timeInterruptShipBuffering) {
+        this.timeInterruptShipBuffering = timeInterruptShipBuffering;
     }
 
     @Override

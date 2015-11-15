@@ -1,20 +1,15 @@
-import be.kdg.schelderadar.domain.ProcessingException;
 import be.kdg.schelderadar.domain.message.*;
 import be.kdg.schelderadar.domain.ProcessingUnit;
-import be.kdg.schelderadar.cache.ShipInfoCache;
-import be.kdg.schelderadar.broker.MQException;
 import be.kdg.schelderadar.broker.RabbitMQ;
 import be.kdg.schelderadar.eta.ETATime;
 import be.kdg.schelderadar.eta.ETACaller;
 import be.kdg.schelderadar.eta.ETAGenerator;
 import be.kdg.schelderadar.out.report.ActionCaller;
-import be.kdg.schelderadar.out.report.ActionCallerException;
 import be.kdg.schelderadar.out.report.ActionGenerator;
 import be.kdg.schelderadar.out.store.MessageStorage;
 import be.kdg.schelderadar.out.store.MessageStorageImpl;
 import be.kdg.schelderadar.service.ShipService;
 import be.kdg.schelderadar.service.ShipServiceApi;
-import be.kdg.schelderadar.service.ShipServiceException;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -24,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
-import java.util.logging.Logger;
 
 /**
  * User: michaelkees
@@ -52,7 +46,7 @@ public class ProcessigUnitRunner {
         ActionCaller actionCaller = new ActionGenerator(actionByTypeMap);
 
         /*TIJD CACHE CLEAR = 50 SECONDEN*/
-        ShipInfoCache shipInfoCache = new ShipInfoCache(50000);
+
 
         ProcessingUnit pu = new ProcessingUnit(shipMessageCollector, msgStorage, actionCaller);
 
@@ -69,7 +63,9 @@ public class ProcessigUnitRunner {
         }
         Channel channel = null;
         try {
-            channel = connection.createChannel();
+            if(connection!=null){
+                channel = connection.createChannel();
+            }
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -78,10 +74,10 @@ public class ProcessigUnitRunner {
         MessageAnalyzer messageAnalyzer = new ShipMessageAnalyzer(messageConverter, shipMessageCollector);
 
         //voor inkomende messages : position en incident  (QUEUE_NAME -> localhost queuename)
-        pu.setInMessageQueue(new RabbitMQ("SHIPINFO", channel, messageAnalyzer));
+        pu.setInMessageQueue(new RabbitMQ("SHIPINFO", channel, messageAnalyzer, messageConverter));
 
         //uitgaande messages : report van incident (QUEUE_NAME -> localhost queuename)
-        pu.setOutMessageQueue( new RabbitMQ("REPORT", channel, messageAnalyzer));
+        pu.setOutMessageQueue( new RabbitMQ("REPORT", channel, messageAnalyzer, messageConverter));
 
         /*voor aanspreken van de ShipInfo Api | proxy */
         pu.setShipService(shipService);
@@ -92,7 +88,7 @@ public class ProcessigUnitRunner {
 
 
         //MOGELIJK CACHE VOOR SHIPINFO --> (OPDRACHT)
-        pu.setShipInfoCache(shipInfoCache);
+
 
         //Voor eta calculaties --> instelbaar voor meer verfijnde etagenerator
         pu.setEtaCaller(ETACaller);
@@ -106,7 +102,9 @@ public class ProcessigUnitRunner {
 
 
         //starten van processing unit voor test
-        pu.start();
+        if(channel!=null) {
+            pu.start();
+        }
 
     }
 }

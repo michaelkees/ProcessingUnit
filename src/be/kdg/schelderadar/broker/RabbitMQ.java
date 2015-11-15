@@ -25,11 +25,13 @@ public class RabbitMQ implements MessageQueue {
     private Consumer consumer;
     private Channel channel;
     private MessageAnalyzer msgAnalyzer;
+    private MessageConverter msgConverter;
 
-    public RabbitMQ(String queueName, Channel channel, MessageAnalyzer msgAnalyzer) {
+    public RabbitMQ(String queueName, Channel channel, MessageAnalyzer msgAnalyzer, MessageConverter msgConverter) {
         this.QUEUE_NAME = queueName;
         this.channel = channel;
         this.msgAnalyzer = msgAnalyzer;
+        this.msgConverter = msgConverter;
     }
 
     @Override
@@ -61,10 +63,7 @@ public class RabbitMQ implements MessageQueue {
 
     @Override
     public void send(IncidentReport iReport) throws IOException, MarshalException, ValidationException {
-        StringWriter writer = new StringWriter();
-        Marshaller marshaller = new Marshaller(writer);
-        marshaller.marshal(iReport);
-        channel.basicPublish("", QUEUE_NAME, null, writer.toString().getBytes());
+        channel.basicPublish("", QUEUE_NAME, null, msgConverter.convertJavaToXML(iReport).getBytes());
     }
 
     @Override

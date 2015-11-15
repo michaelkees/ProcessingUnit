@@ -2,6 +2,8 @@ package testers;
 
 import be.kdg.schelderadar.broker.MessageQueue;
 import be.kdg.schelderadar.broker.RabbitMQ;
+import be.kdg.schelderadar.domain.message.CastorMessageConverter;
+import be.kdg.schelderadar.domain.message.MessageConverter;
 import be.kdg.schelderadar.domain.ship.Ship;
 import be.kdg.schelderadar.domain.ship.ShipInfo;
 import be.kdg.schelderadar.out.report.IncidentReport;
@@ -22,7 +24,7 @@ import java.util.concurrent.TimeoutException;
 public class IncidentReportSender {
     public static void main(String[] args) throws IOException, TimeoutException, MarshalException, ValidationException {
         IncidentReport incidentReport = new IncidentReport();
-
+        MessageConverter msgConverter = new CastorMessageConverter();
 
         Ship testShip = new Ship();
         testShip.setShipId(1234567);
@@ -40,7 +42,7 @@ public class IncidentReportSender {
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
 
-        MessageQueue messageQueue = new RabbitMQ("REPORT", channel, null);
+        MessageQueue messageQueue = new RabbitMQ("REPORT", channel, null,msgConverter );
 
 
         messageQueue.send(incidentReport);

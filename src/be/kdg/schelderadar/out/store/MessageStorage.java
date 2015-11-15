@@ -7,5 +7,10 @@ import be.kdg.schelderadar.domain.message.PositionMessage;
  * Date: 01/11/15
  */
 public interface MessageStorage {
+    /**
+     *
+     * @param message
+     * @param classType
+     */
     void saveMessage(Object message, String classType);
 }
