@@ -48,7 +48,6 @@ public class ProcessingUnit {
     private ETACaller etaCaller;
     private MessageStorage msgStorage;
 
-    //collectors/cache classes
     private final ShipBuffer shipBuffer;
 
     private ActionCaller actionCaller;
@@ -187,7 +186,7 @@ public class ProcessingUnit {
         }
         if (!msgCollector.getIncidentMessages().isEmpty()) {
             for (IncidentMessage im : msgCollector.getIncidentMessages()) {
-                if (im.getType().equals("alles normaal")) {
+                if (im.getType().equalsIgnoreCase("alles normaal")) {
                     alertBuffering(false);
                     currentActionProcessingBuffer="";
                     currentIncidentZone="";
@@ -209,7 +208,6 @@ public class ProcessingUnit {
     }
 
     public void bufferShip(PositionMessage ps) throws ShipServiceException, MarshalException, IOException, ValidationException {
-        //if ship already exists
         Ship ship;
         if (shipBuffer.existsShip(ps.getShipId())) {
             ship = shipBuffer.getShip(ps.getShipId());
@@ -225,7 +223,7 @@ public class ProcessingUnit {
         if (incidentAlert) {
 
             if (isShipMoving(ship)) {
-                reportShipBigOffense(ship); //bij overtredingen
+                reportShipBigOffense(ship);
             }
         }
     }
@@ -287,8 +285,6 @@ public class ProcessingUnit {
         }
     }
 
-
-    //adjustable setters for processingUnit
     public void setEtaTime(ETATime etaTime) {
         this.etaTime = etaTime;
     }

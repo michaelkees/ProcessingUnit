@@ -29,30 +29,23 @@ public class ProcessigUnitRunner {
     public static void main(String[] args)  {
         MessageStorage msgStorage = new MessageStorageImpl();
         MessageConverter messageConverter = new CastorMessageConverter();
-
-        //AANMAKEN etaGenerator
         ETACaller ETACaller = new ETAGenerator();
-
-        //STOCKAGE VAN RABBITMQ ANALYZER
         ShipMessageCollector shipMessageCollector = new ShipMessageCollector();
 
-
-        //ACTIONS FOR INCIDENT
+        //ACTIONS for incident report
         Map<String, String> actionByTypeMap = new HashMap<>();
         actionByTypeMap.put("Man over boord", "AlleSchepenVoorAnker");
         actionByTypeMap.put("Schade", "AlleSchepenInZoneVoorAnker");
         actionByTypeMap.put("Medisch noodgeval", "AlleSchepenInZoneVoorAnker");
-        actionByTypeMap.put("dangerous", "AlleSchepenVoorAnker"); //DEFAULT WAARDE -->  als er dangerous cargo is voor een type incident
+        //if dangerousCargo true -> send always 'AlleSchepenVoorAnker'
+        actionByTypeMap.put("dangerous", "AlleSchepenVoorAnker");
+
         ActionCaller actionCaller = new ActionGenerator(actionByTypeMap);
 
-        /*TIJD CACHE CLEAR = 50 SECONDEN*/
-
-
         ProcessingUnit pu = new ProcessingUnit(shipMessageCollector, msgStorage, actionCaller);
-
         ShipService shipService = new ShipServiceApi("www.services4se3.com/shipservice/");
 
-        /*SERVER VAN RABBITMQ MOET RUNNEN*/
+        /*SERVER rabbitMQ --> running*/
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
         Connection connection = null;
@@ -70,38 +63,36 @@ public class ProcessigUnitRunner {
             System.out.println(e.getMessage());
         }
 
-        //Analyzer in QUEUE --> converteren POSITION OF INCIDENT
+        //Analyzer in QUEUE --> converting POSITION or INCIDENT
         MessageAnalyzer messageAnalyzer = new ShipMessageAnalyzer(messageConverter, shipMessageCollector);
 
-        //voor inkomende messages : position en incident  (QUEUE_NAME -> localhost queuename)
+        //incoming messages : position or incident  (QUEUE_NAME -> localhost queuename)
         pu.setInMessageQueue(new RabbitMQ("SHIPINFO", channel, messageAnalyzer, messageConverter));
 
-        //uitgaande messages : report van incident (QUEUE_NAME -> localhost queuename)
+        //outgoing messages : report of incident (QUEUE_NAME -> localhost queuename)
         pu.setOutMessageQueue( new RabbitMQ("REPORT", channel, messageAnalyzer, messageConverter));
 
-        /*voor aanspreken van de ShipInfo Api | proxy */
+        /*use ShipInfo Api | proxy */
         pu.setShipService(shipService);
 
-        /*tijd dat er maximaal gekeken wordt of het Ship nog in buffer veranderd --> anders wordt buffering van ship onderbroken
-                              50 SECONDEN */
+        /* max time ship will be buffered (0 messages are coming from the messageQueue for 50SECONDS)*/
         pu.setTimeToInterrupt(50000);
 
+        /* max time ShipBuffer will be cache ship info */
+        pu.setTimeToClearCache(500000);
 
-        //MOGELIJK CACHE VOOR SHIPINFO --> (OPDRACHT)
-
-
-        //Voor eta calculaties --> instelbaar voor meer verfijnde etagenerator
+        //ETA Caller for Eta generator
         pu.setEtaCaller(ETACaller);
 
-        //MOGELIJKHEDEN: ZONE | POSITION \ NORMAL=opvragen (pu.setShipIdsForETA() implementeren);
+        //POSSIBILITIES: ZONE | POSITION \ NORMAL = (pu.setShipIdsForETA() implementation);
         pu.setEtaTime(ETATime.NORMAL);
 
+        //if EtaTime.NORMAL -> sending List with ShipIds
         ArrayList<Integer> shipIds = new ArrayList<>();
         shipIds.add(1234567);
         pu.setShipIdsForETA(shipIds);
 
-
-        //starten van processing unit voor test
+        //START PROCESSOR
         if(channel!=null) {
             pu.start();
         }

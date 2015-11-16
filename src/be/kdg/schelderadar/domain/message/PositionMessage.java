@@ -10,7 +10,6 @@ import java.util.Date;
  * Date: 31/10/15
  */
 
-@XmlRootElement
 public class PositionMessage {
     private int shipId;
     private Date timestamp;

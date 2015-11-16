@@ -7,6 +7,7 @@ import be.kdg.schelderadar.domain.ship.ShipInfo;
 import java.util.*;
 
 /**
+ * Storage class for all Ships; Coupled with the ShipMessageMapper   / part of shipBuffer
  * User: michaelkees
  * Date: 31/10/15
  */

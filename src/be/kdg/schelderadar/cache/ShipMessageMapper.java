@@ -7,11 +7,11 @@ import be.kdg.schelderadar.domain.ship.ShipInfo;
 import java.util.*;
 
 /**
+ * Storage class for all Position Messages / Ship
  * User: michaelkees
  * Date: 02/11/15
  */
 public class ShipMessageMapper {
-    private Map<Integer, ShipInfo> shipInfos;
     private NavigableMap<Ship, ArrayList<PositionMessage>> shipPositionMessages = new TreeMap<>();
     private long lastTimeCleared;
     private long timeSpanToCache;
@@ -60,13 +60,12 @@ public class ShipMessageMapper {
         }
     }
 
-    //CLEARS CACHE OF FIRST POSITION MESSAGES
     public void clearCache(){
         for(Map.Entry<Ship, ArrayList<PositionMessage>> shipMap : shipPositionMessages.entrySet()){
             int sizeShipMap = shipMap.getValue().size();
             if(sizeShipMap>5){
                 for(int i = 0; i < 2; i++){
-                    shipMap.getValue().remove(i); //remove first values of arraylist
+                    shipMap.getValue().remove(i);
                 }
             }
         }
